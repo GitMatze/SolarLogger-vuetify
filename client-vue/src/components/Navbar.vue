@@ -8,7 +8,7 @@
             </v-toolbar-title>
             <template v-slot:extension>
                 <v-tabs
-                    class="hidden-sm-and-down" 
+                    class="hidden-xs" 
                     align-with-title
                     background-color="transparent"            >
                     <v-tab v-for="link in links"
@@ -61,7 +61,7 @@ export default {
         return {
             drawer: false,
             links: [
-                {text: 'Startseite', route: '/'},
+                {text: 'Übersicht', route: '/'},
                 {text: 'Statistiken', route: '/statistics'},
                 {text: 'Weiteres', route: '/more'},                
             ]

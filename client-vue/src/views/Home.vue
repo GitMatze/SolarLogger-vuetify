@@ -1,12 +1,12 @@
 <template>
   <div class="home">
     <v-container>
-
+    
+    <!-- Desktop -->
     <v-card
-      class="mx-auto my-4"
-      max-width="1000"
-      min-width="800"
-      
+      class="mx-auto my-4 hidden-xs-only "
+      max-width="1200"
+      min-width="600"      
     >
       <v-list-item two-line>
         <v-list-item-content>
@@ -27,21 +27,69 @@
       </v-card-text>  
     </v-card>
 
+    <!-- Phone -->
+    <v-card
+      class="mx-auto my-4 hidden-sm-and-up "                  
+    >
+    <v-simple-table>
+      <template v-slot:default>        
+        <tbody>
+          <tr>
+            <td>Photovoltaik</td>
+            <td>3,73 kw/h</td>
+          </tr>
+          <tr>
+            <td>Netz</td>
+            <td>-2,43 kw/h</td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+    </v-card>
+
     <v-divider></v-divider>
 
       <v-card
-      class="ma-auto my-4 pa-md-4 pa-sm-2 pa-xs-2"
-      max-width="1000"
+      class="ma-auto my-4 pa-3"
+      max-width="1200"
       >
-       <h2 class="title">Leistung von PV und Netz</h2>
-       <GradientLineChart chart-id="line-daily" v-if="loaded" :chartData="chartData" :refresh="refresh"/>          
-      </v-card>
-      <v-card
-      class="ma-auto my-4 pa-md-4 pa-sm-2 pa-xs-2"
-      max-width="1000"
-      >
-       <h2 class=title>Stromverbrauch</h2>
-       <StackedLineChart chart-id="line-stacked1" :chartData="chartDataStacked" :refresh="refresh"/>
+        <v-container max-width="40" class="d-flex justify-start">
+            <h2 class="headline mr-4 pb-3 align-self-center">Tagesübersicht</h2>
+          <v-menu
+            v-model="menu1"
+            :close-on-content-click="false"
+            max-width="290"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                :value="computedDateFormattedMomentjs"
+                readonly
+                dense
+                v-on="on"
+                @click:clear="date = null"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="date"
+              @change="menu1 = false"
+            ></v-date-picker>
+          </v-menu>
+          <v-spacer></v-spacer>
+        </v-container>
+
+        <v-divider></v-divider>
+
+        <v-container class="mx-auto my-2">
+          <h2 class="title d-flex justify-space-between"> Leistung von PV und Netz <span class="overline">heute</span></h2>
+         <GradientLineChart chart-id="line-daily" :chartData="chartData" :refresh="refresh"/> 
+        </v-container>
+
+        <v-divider></v-divider>
+               
+        <v-container class="mx-auto my-2">
+          <h2 class="title d-flex justify-space-between"> Stromverbrauch <span class="overline">heute</span></h2>
+         <StackedLineChart chart-id="line-stacked1" :chartData="chartDataStacked" :refresh="refresh"/>
+        </v-container>
       </v-card>
 
   
@@ -72,13 +120,19 @@
           newPVValue: null,
           newGridValue: null,
           showError: false,
-          loaded: false                   
+          date: new Date().toISOString().substr(0, 10),
+          menu1: false,                   
       }
     },
 
+    computed: {
+      computedDateFormattedMomentjs () {
+        return this.date ? moment(this.date).format('l') : ''
+      }
+    },
     async created() {
         this.getData()
-        setInterval(this.updateClock, 1000);       
+        // setInterval(this.updateClock, 1000);       
     },    
     methods: {
         async postData() {
@@ -116,9 +170,13 @@
                      datasets: [
                          {label: 'Grid',
                          yAxisID : 'y-axis-0',
+                         borderColor: 'rgba(188, 212, 83, 1)',
+                         backgroundColor: 'rgba(188, 212, 83, 1)',
                          data: zippedGrid
                          },
                          {label: 'PV',
+                         borderColor: 'rgba(248, 212, 83, 1)',
+                         backgroundColor: 'rgba(248, 212, 83, 1)',
                          yAxisID : 'y-axis-0',
                          data: zippedPV
                          }]
@@ -127,16 +185,20 @@
                      datasets: [
                          {label: 'Grid',
                          yAxisID : 'y-axis-0',
+                         borderColor: 'rgba(188, 212, 83, 1)',
+                         backgroundColor: 'rgba(188, 212, 83, 1)',
                          data: zippedGrid
                          },
                          {label: 'PV',
+                         borderColor: 'rgba(248, 212, 83, 1)',
+                         backgroundColor: 'rgba(248, 212, 83, 1)',
                          yAxisID : 'y-axis-0',
                          data: zippedPV_stacked
                          }]
                  }
                  setTimeout(() => {
                      this.loaded = true
-                    this.refresh = !this.refresh
+                     this.refresh = !this.refresh
                 }, 100)
             } catch(err) {
                 this.error = err.message
