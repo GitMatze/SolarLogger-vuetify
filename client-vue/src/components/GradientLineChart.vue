@@ -66,10 +66,10 @@ export default {
           yAxes: [{
               scaleLabel: {
                   display: true,
-                  labelString: 'Power in W'
+                  labelString: 'Leistung in W'
               },
             ticks: {
-              beginAtZero: false,              
+              beginAtZero: true,              
             },
             gridLines: {
               display: true,
@@ -80,9 +80,20 @@ export default {
           xAxes: [ {
               scaleLabel: {
                   display: true,
-                  labelString: 'Time'
+                  labelString: 'Zeit'
               },
             type: 'time',
+            time: {
+              displayFormats: {
+                'millisecond': 'kk:mm:ss.SSS',
+                'second': 'kk:mm:ss',
+                'minute': 'kk:mm',
+                'hour': 'kk',
+                'day': 'MMM DD',
+                'week': 'll',
+                'month': 'MMM DD'                
+                }
+            },
             gridLines: {
               display: true,
               color: '#EEF0F4',

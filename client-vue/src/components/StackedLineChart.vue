@@ -23,11 +23,18 @@ Chart.controllers.StackedLine = Chart.controllers.line.extend({
     var ctx = this.chart.chart.ctx;
     var gradient = ctx.createLinearGradient(0, top, 0, bottom);
     var ratio = Math.min((zero - top) / (bottom - top), 1);
+    /* eslint-disable no-console */
+     /*  console.log(`RATIO:  ${ratio}`); 
+      console.log(`min:  ${min}`); 
+      console.log(`max:  ${max}`);   */   
+    /* eslint-enable no-console */
+    ratio = Math.max(ratio,0)
     gradient.addColorStop(0, 'rgba(188, 212, 151, 0.9)');
     gradient.addColorStop(ratio, 'rgba(188, 212, 151, 0.9)');
     gradient.addColorStop(ratio, 'rgba(248, 212, 83, 0.5)');
     gradient.addColorStop(1, 'rgba(248, 212, 83, 0.5)');
-    this.chart.data.datasets[0].backgroundColor = gradient;
+    this.chart.data.datasets[0].backgroundColor = ratio==1 ? 'rgba(188, 212, 151, 0.9)' 
+                              : ( ratio==0 ? 'rgba(248, 212, 83, 0.5)' : gradient)
     this.chart.data.datasets[1].backgroundColor = 'rgba(248,212,83, 0.5)';
     
     this.chart.data.datasets[0].pointRadius = 0
@@ -74,10 +81,10 @@ export default {
           yAxes: [{
               scaleLabel: {
                   display: true,
-                  labelString: 'Power in W'
+                  labelString: 'Leistung in W'
               },
             ticks: {
-              beginAtZero: false,              
+              beginAtZero: true,              
             },
             gridLines: {
               display: true,
@@ -88,9 +95,20 @@ export default {
           xAxes: [ {
               scaleLabel: {
                   display: true,
-                  labelString: 'Time'
+                  labelString: 'Zeit'
               },
             type: 'time',
+            time: {
+              displayFormats: {
+                'millisecond': 'kk:mm:ss.SSS',
+                'second': 'kk:mm:ss',
+                'minute': 'kk:mm',
+                'hour': 'kk',
+                'day': 'MMM DD',
+                'week': 'll',
+                'month': 'MMM DD'                
+                }
+            },
             gridLines: {
               display: true,
               color: '#EEF0F4',
