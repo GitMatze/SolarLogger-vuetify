@@ -23,8 +23,8 @@ var pv_day = {
     '16':5000,
     '17':4000,
     '18':1300,
-    '19':600,
-    '20':200,
+    '19':1,
+    '20':1,
     '21':1,
     '22':0,
     '23':0,
@@ -86,19 +86,19 @@ var month = ''
 var day_rand = 1
 var c = 0
 
-var start = '2020-01-17T22:00+01:00'
+var start = '2019-06-23T13:10:00'
 step = 10*60
 
 db.run('DELETE FROM energy')
 // console.log(typeof moment().subtract(10, 'hours').format('MM'))
 // console.log(grid_day[`${moment().subtract(i*4, 'seconds').format('kk')}`])
 
-for(var i = 0;i<30000; i++) {
+for(var i = 0;i<35000; i++) {
 
     c++;
 
-    var hours = moment(start).subtract(i*step, 'seconds').format('kk')
-    var month = moment(start).subtract(i*step, 'seconds').format('MM')
+    var hours = moment(start).add(i*step, 'seconds').format('kk')
+    var month = moment(start).add(i*step, 'seconds').format('MM')
 
     if (hours == '01' && c > 70 ) {
         c = 0
@@ -130,7 +130,7 @@ for(var i = 0;i<30000; i++) {
           $pv: pv_out,
           $grid_in: grid_in,
           $grid_out: grid_out,
-          $time: moment(start).subtract(i*step, 'seconds').format()
+          $time: moment(start).add(i*step, 'seconds').format()
         },
         // callback function to run when the query finishes:
         (err) => {

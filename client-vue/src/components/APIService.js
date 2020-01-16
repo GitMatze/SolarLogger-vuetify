@@ -15,6 +15,20 @@ class APIService {
         })
 
     }
+
+    static getEnergyPerMonth(){
+        return new Promise(async (resolve, reject) => {
+              try{
+                const res = await axios.get( 'api/energy/months' )
+                const data = res.data                 
+                resolve(data)
+            } catch(err) {
+                reject(err)
+            }
+        })
+
+    }
+
     static getPower(period) {
         // var periods = 'api/power/2020-01-14T14:23:30+01:00_2020-01-14T14:23:50+01:00'
         return new Promise(async (resolve, reject) => {           
@@ -26,6 +40,19 @@ class APIService {
                 reject(err)
             }
         })
+    }
+    static getCurrentVals() {
+        return new Promise(async (resolve, reject) => {
+            try{
+              const res = await axios.get( 'api/power/current' )
+              const data = res.data                 
+              resolve(data)
+          } catch(err) {
+              reject(err)
+          }
+      })
+
+        
     }   
 }
 

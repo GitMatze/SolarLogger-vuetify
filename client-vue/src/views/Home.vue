@@ -18,10 +18,10 @@
       <v-card-text>
         <v-row align="center">
           <v-col class="display-1" cols="6">
-            <span class="headline">Photovoltaik:</span> 400 W
+            <span class="headline">Photovoltaik:</span> {{pv_current}} W
           </v-col>
           <v-col class="display-1" cols="6">
-            <span class="headline">Netz:</span> 150 W
+            <span class="headline">Netz:</span> {{grid_current}} W
           </v-col>          
         </v-row>
       </v-card-text>  
@@ -36,11 +36,11 @@
         <tbody>
           <tr>
             <td>Photovoltaik</td>
-            <td>3,73 kw/h</td>
+            <td>{{pv_current}} W</td>
           </tr>
           <tr>
             <td>Netz</td>
-            <td>-2,43 kw/h</td>
+            <td>{{grid_current}} W</td>
           </tr>
         </tbody>
       </template>
@@ -78,7 +78,7 @@
               :max="date_max"
               :min="date_min"
               color='#bcd497'
-              @change="getDataSQL"
+              @change="getData"
               @click:date="menu1=false"
             ></v-date-picker>
           </v-menu>
@@ -88,7 +88,7 @@
             filled
             dense
             color='#bcd497'
-            v-on:keyup.enter="getDataSQL"
+            v-on:keyup.enter="getData"
           ></v-text-field>
            <v-text-field
             v-model="endtime"
@@ -96,7 +96,7 @@
             filled
             dense
             color='#bcd497'
-            v-on:keyup.enter="getDataSQL"
+            v-on:keyup.enter="getData"
 
           ></v-text-field>
         </v-container>
@@ -131,8 +131,7 @@
 
 <script>
   import StackedLineChart from '@/components/StackedLineChart'
-    import GradientLineChart from '@/components/GradientLineChart'
-
+  import GradientLineChart from '@/components/GradientLineChart'
   import APIService from '@/components/APIService'
 
   import moment from 'moment'
@@ -146,9 +145,11 @@
       return {
           chartData: '',
           chartDataStacked: '',
+          pv_current: '_ _',
+          grid_current: '_ _',
           refresh: false,
-          date_max: null, // moment().format(),
-          date_min: null, //moment().substract(2, 'days').format(),
+          date_max: null,
+          date_min: null, 
           err: '',
           log :'',
           newPVValue: null,
@@ -156,9 +157,8 @@
           showError: false,
           date: new Date().toISOString().substr(0, 10),
           menu1: false,
-          starttime: moment().subtract(4, 'hour').format('kk:mm'),
+          starttime: moment().subtract(8, 'hour').format('kk:mm'),
           endtime: 'jetzt',
-          rawdata: '',
           result:''                    
       }
     },
@@ -173,62 +173,52 @@
       }      
     },
     async created() {
-        this.getDataSQL()
+        this.getData()
         this.getMinMaxTime()
-        // setInterval(this.updateClock, 1000);       
+        this.updateCurrentVals() //first update immediately
+        // setInterval(this.updateCurrentVals, 4000);       
     },    
     methods: {
         async getMinMaxTime() {
           var result = await APIService.getMinMaxTime()
-          this.result= result
           if (result[0].max==undefined) {
-            this.err = 'Keine Beschränkungen für die Zeiteingabe empfangen'
+            this.err = 'Keine Beschränkungen für Zeitauswahl empfangen.'
             this.showError=true
             return
           }         
           this.date_max = result[0].max
           this.date_min = result[0].min
         },       
-        async getDataSQL() {
+        async getData() { // TODO rename
           if (!this.checkPeriodFormat() ) {return}
             try {
                 this.loaded = false
-                 var rawData = await APIService.getPower(this.period)
-                 this.rawData = rawData
-                 if (rawData[1]==undefined) {
-                   this.err= 'Keine Leistungsdaten empfangen.'
-                   this.showError = true
-                   return
-                 }
-                 var pv = rawData.map(entry=> entry.pv)
-                 var timestamps = rawData.map(entry => entry.time)
-                 var grid = rawData.map(entry => entry.grid)
-                 var pv_stacked = pv.map(function(entry, i) {    //stackedPV
-                    return entry + grid[i];
-                    });                  
-                 var zippedPV = pv.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    });
-                var zippedPV_stacked = pv_stacked.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    });
-                var zippedGrid = grid.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    })
-                 
+                var rawData = await APIService.getPower(this.period)
+                if (rawData[1]==undefined) {
+                  this.err= 'Keine Daten empfangen.'
+                  this.showError = true
+                  return
+                }         
+                var pv = rawData.map(entry => 
+                   ({x: entry.time, y: entry.pv}))
+                var grid = rawData.map(entry => 
+                   ({x: entry.time, y: entry.grid}))
+                var pv_stacked = rawData.map(entry => 
+                   ({x: entry.time, y: entry.pv+entry.grid}))
+
                  this.chartData = {                     
                      datasets: [
                          {label: 'Netz',
                          yAxisID : 'y-axis-0',
                          borderColor: 'rgba(188, 212, 83, 1)',
                          backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: zippedGrid
+                         data: grid
                          },
                          {label: 'PV',
                          borderColor: 'rgba(248, 212, 83, 1)',
                          backgroundColor: 'rgba(248, 212, 83, 1)',
                          yAxisID : 'y-axis-0',
-                         data: zippedPV
+                         data: pv
                          }]
                  }
                  this.chartDataStacked = {                     
@@ -237,23 +227,24 @@
                          yAxisID : 'y-axis-0',
                          borderColor: 'rgba(188, 212, 83, 1)',
                          backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: zippedGrid
+                         data: grid
                          },
                          {label: 'PV',
                          borderColor: 'rgba(248, 212, 83, 1)',
                          backgroundColor: 'rgba(248, 212, 83, 1)',
                          yAxisID : 'y-axis-0',
-                         data: zippedPV_stacked
+                         data: pv_stacked
                          }]
                  }
-                 setTimeout(() => {
-                     this.loaded = true
-                     this.refresh = !this.refresh
-                }, 100)
+                 this.loaded = true //TODO loaded is not used at all
+                 this.refresh = !this.refresh                
             } catch(err) {
-                this.error = err.message
+                this.err = `Error ocurred while fetching chart data: ${err.message}`
+                this.showError = true
+                
             }
         },
+        // checks if input day time is valid 
         checkPeriodFormat() { 
           this.showError = false 
           if (this.endtime.toLowerCase() == 'jetzt') {
@@ -273,69 +264,24 @@
           else {
             return true
           }                 
-        },        
-        async getData() {
-            try {
-                this.loaded = false
-                 var rawData = await APIService.getPosts()
-                 var timestamps = rawData.map(entry => entry.timestamp)
-                 var pv = rawData.map(entry => entry.pv)
-                 var grid = rawData.map(entry => entry.grid)
-                 var pv_stacked = pv.map(function(entry, i) {    //stackedPV
-                    return entry + grid[i];
-                    });                  
-                 var zippedPV = pv.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    });
-                var zippedPV_stacked = pv_stacked.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    });
-                var zippedGrid = grid.map(function(entry, i) {
-                    return {x: timestamps[i], y: entry};
-                    })
-                 
-                 this.chartData = {                     
-                     datasets: [
-                         {label: 'Grid',
-                         yAxisID : 'y-axis-0',
-                         borderColor: 'rgba(188, 212, 83, 1)',
-                         backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: zippedGrid
-                         },
-                         {label: 'PV',
-                         borderColor: 'rgba(248, 212, 83, 1)',
-                         backgroundColor: 'rgba(248, 212, 83, 1)',
-                         yAxisID : 'y-axis-0',
-                         data: zippedPV
-                         }]
-                 }
-                 this.chartDataStacked = {                     
-                     datasets: [
-                         {label: 'Grid',
-                         yAxisID : 'y-axis-0',
-                         borderColor: 'rgba(188, 212, 83, 1)',
-                         backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: zippedGrid
-                         },
-                         {label: 'PV',
-                         borderColor: 'rgba(248, 212, 83, 1)',
-                         backgroundColor: 'rgba(248, 212, 83, 1)',
-                         yAxisID : 'y-axis-0',
-                         data: zippedPV_stacked
-                         }]
-                 }
-                 setTimeout(() => {
-                     this.loaded = true
-                     this.refresh = !this.refresh
-                }, 100)
-            } catch(err) {
-                this.error = err.message
-            }
         },
-        updateClock() {
-          var time = moment(new Date).format('hh:mm:ss')
-          document.getElementById('time').innerHTML = ['Time', time].join(': ')
-        }
+        async updateCurrentVals() {
+          var rawData = await APIService.getCurrentVals()
+          this.result = rawData
+          if ( !(typeof rawData[0].pv == 'number') || !(typeof rawData[0].grid == 'number')) {
+            this.err = 'Unerwarter Fehler beim Updaten der Momentanwerte.'
+            this.showError = true
+          }
+          else if (rawData[0].pv == null){
+            this.error = 'Der Sensor scheint keine neuen Daten zu liefern.'
+            this.showError = true
+          }
+          else {
+            this.pv_current = rawData[0].pv
+            this.grid_current = rawData[0].grid
+          }
+
+        }        
     }
   }
 </script>

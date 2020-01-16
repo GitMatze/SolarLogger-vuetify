@@ -13,7 +13,7 @@ var pv_day = {
     '05':2,
     '06':50,
     '07':50,
-    '08':300,
+    '08':100,
     '09':600,
     '10':1300,
     '11':4000,
@@ -84,13 +84,13 @@ var day_rand = 1
 var c = 0
 
 var start = '2020-01-17T22:00+01:00'
-step = 5*60
+step = 4
 
 db.run('DELETE FROM power')
 // console.log(typeof moment().subtract(10, 'hours').format('MM'))
 // console.log(grid_day[`${moment().subtract(i*4, 'seconds').format('kk')}`])
 
-for(var i = 0;i<50000; i++) {
+for(var i = 0;i<20000; i++) {
 
     c++;
 
