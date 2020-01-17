@@ -15,11 +15,16 @@ class APIService {
         })
 
     }
-
-    static getEnergyPerMonth(){
+    // type can be either 'month' or 'day'
+    static getEnergyOverview(type, period){
+        
         return new Promise(async (resolve, reject) => {
               try{
-                const res = await axios.get( 'api/energy/months' )
+                var url = 'api/energy/' + type + '_' + period
+                /* eslint-disable no-console */
+                console.log(url);
+                /* eslint-enable no-console */
+                const res = await axios.get( url )
                 const data = res.data                 
                 resolve(data)
             } catch(err) {

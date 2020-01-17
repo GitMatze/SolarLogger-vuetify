@@ -100,9 +100,9 @@ export default {
             type: 'time',
             time: {
               displayFormats: {
-                'millisecond': 'kk:mm:ss.SSS',
-                'second': 'kk:mm:ss',
-                'minute': 'kk:mm',
+                'millisecond': 'HH:mm:ss.SSS',
+                'second': 'HH:mm:ss',
+                'minute': 'HH:mm',
                 'hour': 'kk',
                 'day': 'MMM DD',
                 'week': 'll',

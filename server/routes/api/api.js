@@ -9,6 +9,8 @@ var t_max = {energy: null, power: null} //stores min and max time of entries in 
 var t_min = {energy: null, power: null}
 var current_power = {pv: null, grid: null}
 
+const sql_groups= {month: '%Y %m'}  // used for queries of aggregated data
+
 updateMinMaxTime() //load on startup
 
 router.get('/MinMaxTime', (req, res) => {
@@ -111,19 +113,33 @@ router.get('/power/:period', (req, res) => {
   }
 })
 
-router.get('/energy/months', (req, res) => {
+router.get('/energy/:data', (req, res) => {
+  const data = req.params.data.split('_')
+  const type = data[0]
+  const period = [ data[1], data[2] ]
   console.log('')
   console.log('GET REQUEST energy/month')
+  console.log(data)
   try { 
-    db.all(`SELECT STRFTIME('%Y %m', time) month, 
-    MAX(pv)-MIN(pv) pv_month, 
-    MAX(grid_in)-MIN(grid_in) grid_in_month, 
-    MAX(grid_out)-MIN(grid_out) grid_out_month 
-    FROM energy 
-    GROUP BY STRFTIME('%Y %m', time) 
+    db.all(`SELECT STRFTIME($sql, datetime(time, 'localtime')) time, 
+    MAX(pv)-MIN(pv) pv, 
+    MAX(grid_in)-MIN(grid_in) grid_in, 
+    MAX(grid_out)-MIN(grid_out) grid_out 
+    FROM energy
+    WHERE time>datetime($start) AND time<datetime($end) 
+    GROUP BY STRFTIME('%Y %m', datetime(time, 'localtime')) 
     ORDER BY 1`,
+    {
+      $sql: sql_groups[type], // TODO data is a bad name
+      $start: period[0],
+      $end: period[1],
+    },
     (err, rows) => {
-      if (rows[0].pv_month != undefined) { 
+      if (err) {
+        console.log(`SQL Error: ${err.message}`)
+        res.send([{}])
+      }
+      else if (rows[0].pv != undefined) { // TODO row = undefined not catched
         console.log(`Number of data entries: ${rows.length}`)
         res.send(rows);        
       } 

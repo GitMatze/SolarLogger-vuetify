@@ -11,7 +11,7 @@
       <v-list-item two-line>
         <v-list-item-content>
           <v-list-item-title class="headline">Aktuelle Werte</v-list-item-title>
-          <v-list-item-subtitle>Mon, 12:30:32</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ last_update_time}}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
   
@@ -54,7 +54,9 @@
       max-width="1200"
       >
         <v-container max-width="40" class="d-flex justify-start">
-            <h2 class="headline mr-9 pb-3 align-self-center hidden-xs-only">Tagesübersicht</h2>
+            <h2 class="headline mr-9 pb-3 align-self-center hidden-xs-only">Tagesverlauf</h2>
+            <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
             <v-spacer></v-spacer>
           <v-menu
             v-model="menu1"
@@ -101,13 +103,16 @@
           ></v-text-field>
         </v-container>
 
-         <v-banner v-model="showError" transition="slide-y-transition">
-        <h1 class="body-2 error--text">{{this.err}}</h1>
-        <template v-slot:actions="{ dismiss }">
-          <v-btn text color="error" @click="dismiss">OK</v-btn>          
-        </template>
-      </v-banner>
-
+        <div v-for="(err, index) in errs"
+        v-bind:key="index"        >
+          <v-banner v-model="err.show" transition="slide-y-transition">
+            <h1 class="body-2 error--text">{{err.msg}}</h1>
+            <template v-slot:actions="{ dismiss }">
+              <v-btn text color="error" @click="dismiss">OK</v-btn>          
+            </template>
+          </v-banner>
+       </div>
+        
         <v-divider></v-divider>
 
         <v-container class="mx-auto my-2">
@@ -147,17 +152,20 @@
           chartDataStacked: '',
           pv_current: '_ _',
           grid_current: '_ _',
+          last_update_time: moment().format('dddd HH:mm:ss'),
           refresh: false,
           date_max: null,
           date_min: null, 
-          err: '',
+          errs: {
+            getMinMaxTime: {show: false, msg:''},
+            getData: {show: false, msg:''},
+            checkPeriodFormat: {show: false, msg:''},
+            updateCurrentVals: {show: false, msg:''},
+          },
           log :'',
-          newPVValue: null,
-          newGridValue: null,
-          showError: false,
           date: new Date().toISOString().substr(0, 10),
           menu1: false,
-          starttime: moment().subtract(8, 'hour').format('kk:mm'),
+          starttime: moment().startOf('day').format('HH:mm'),
           endtime: 'jetzt',
           result:''                    
       }
@@ -180,10 +188,11 @@
     },    
     methods: {
         async getMinMaxTime() {
+          this.errs.getMinMaxTime.show = false
           var result = await APIService.getMinMaxTime()
           if (result[0].max==undefined) {
-            this.err = 'Keine Beschränkungen für Zeitauswahl empfangen.'
-            this.showError=true
+            this.errs.getMinMaxTime.msg = 'Keine Beschränkungen für Zeitauswahl empfangen.'
+            this.errs.getMinMaxTime.show=true
             return
           }         
           this.date_max = result[0].max
@@ -192,11 +201,12 @@
         async getData() { // TODO rename
           if (!this.checkPeriodFormat() ) {return}
             try {
+                this.errs.getData.show = false
                 this.loaded = false
                 var rawData = await APIService.getPower(this.period)
                 if (rawData[1]==undefined) {
-                  this.err= 'Keine Daten empfangen.'
-                  this.showError = true
+                  this.errs.getData.msg= 'Keine Daten empfangen.'
+                  this.errs.getData.show = true
                   return
                 }         
                 var pv = rawData.map(entry => 
@@ -239,26 +249,27 @@
                  this.loaded = true //TODO loaded is not used at all
                  this.refresh = !this.refresh                
             } catch(err) {
-                this.err = `Error ocurred while fetching chart data: ${err.message}`
-                this.showError = true
+                this.errs.getData.msg = `Error ocurred while fetching chart data: ${err.message}`
+                this.errs.getData.show = true
                 
             }
         },
         // checks if input day time is valid 
         checkPeriodFormat() { 
-          this.showError = false 
+          this.errs.checkPeriodFormat.show = false 
           if (this.endtime.toLowerCase() == 'jetzt') {
-            this.endtime = moment().format('kk:mm')
+            this.endtime = moment().format('HH:mm')
           }        
-          this.starttime = moment(this.starttime,'kk:mm').format('kk:mm')
-          this.endtime = moment(this.endtime,'kk:mm').format('kk:mm')            
+          this.starttime = moment(this.starttime,'HH:mm').format('HH:mm')
+          this.endtime = moment(this.endtime,'HH:mm').format('HH:mm')            
           
           if (this.starttime == 'Invalid date' || this.endtime == 'Invalid date') {
             return false
           }
-          else if ( moment(this.endtime, 'kk:mm').diff( moment(this.starttime, 'kk:mm') ) <0 ){
-            this.err = 'Die Anfangszeit darf nicht größer als die Endzeit sein.'
-            this.showError = true
+          // TODO was ist mit 24 Uhr? 
+          else if ( moment(this.endtime, 'HH:mm').diff( moment(this.starttime, 'HH:mm') ) <0 ){ 
+            this.errs.checkPeriodFormat.msg = 'Die Anfangszeit darf nicht größer als die Endzeit sein.'
+            this.errs.checkPeriodFormat.show = true
             return false
           }
           else {
@@ -266,22 +277,31 @@
           }                 
         },
         async updateCurrentVals() {
-          var rawData = await APIService.getCurrentVals()
-          this.result = rawData
-          if ( !(typeof rawData[0].pv == 'number') || !(typeof rawData[0].grid == 'number')) {
-            this.err = 'Unerwarter Fehler beim Updaten der Momentanwerte.'
-            this.showError = true
+          try {
+            var rawData = await APIService.getCurrentVals()
+            this.result = rawData
+            if (rawData[0].pv == null){
+              this.errs.updateCurrentVals.msg = 'Der Sensor scheint keine Daten zu liefern.'
+              this.errs.updateCurrentVals.show = true
+            }
+            else if ( !(typeof rawData[0].pv == 'number') || !(typeof rawData[0].grid == 'number')) {
+              this.errs.updateCurrentVals.msg = 'Unerwarter Fehler beim Updaten der Momentanwerte.'
+              this.errs.updateCurrentVals.show = true
+            }
+            else {
+              this.pv_current = rawData[0].pv
+              this.grid_current = rawData[0].grid
+              this.last_update_time = moment().format('dddd HH:mm:ss')
+              this.errs.updateCurrentVals.show = false
+
+            }
           }
-          else if (rawData[0].pv == null){
-            this.error = 'Der Sensor scheint keine neuen Daten zu liefern.'
-            this.showError = true
-          }
-          else {
-            this.pv_current = rawData[0].pv
-            this.grid_current = rawData[0].grid
+          catch (err) {
+            this.errs.updateCurrentVals.msg = `Fehler beim Updaten der Momentanwerte: ${err.message}`
+            this.errs.updateCurrentVals.show = true
           }
 
-        }        
+        }   
     }
   }
 </script>
