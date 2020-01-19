@@ -7,9 +7,12 @@ const router = express.Router();
 
 var t_max = {energy: null, power: null} //stores min and max time of entries in database
 var t_min = {energy: null, power: null}
-var current_power = {pv: null, grid: null}
+var current_power = {pv: null, grid: null, time: null}
 
-const sql_groups= {month: '%Y %m'}  // used for queries of aggregated data
+const sql_groups= {
+  month: '%Y %m', 
+  day: '%Y %m %d',
+  year: '%Y' }  // used for queries of aggregated data
 
 updateMinMaxTime() //load on startup
 
@@ -127,8 +130,9 @@ router.get('/energy/:data', (req, res) => {
     MAX(grid_out)-MIN(grid_out) grid_out 
     FROM energy
     WHERE time>datetime($start) AND time<datetime($end) 
-    GROUP BY STRFTIME('%Y %m', datetime(time, 'localtime')) 
-    ORDER BY 1`,
+    GROUP BY STRFTIME($sql, datetime(time, 'localtime')) 
+    ORDER BY 1
+    LIMIT 12`,
     {
       $sql: sql_groups[type], // TODO data is a bad name
       $start: period[0],
@@ -139,7 +143,7 @@ router.get('/energy/:data', (req, res) => {
         console.log(`SQL Error: ${err.message}`)
         res.send([{}])
       }
-      else if (rows[0].pv != undefined) { // TODO row = undefined not catched
+      else if (rows.length > 0 ) { // TODO row = undefined not catched
         console.log(`Number of data entries: ${rows.length}`)
         res.send(rows);        
       } 
@@ -168,6 +172,7 @@ router.post('/power', async (req, res) => { // TODO catch undefineds...
           console.log(`Added new Value to power: pv: ${req.body.pv}, grid : ${req.body.grid}`)
           current_power.pv = req.body.pv
           current_power.grid = req.body.grid
+          current_power.time = moment().format()
         }
     })
   res.status(201).send();

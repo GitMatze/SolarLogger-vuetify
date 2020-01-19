@@ -70,7 +70,7 @@
                   let currentValue = dataset.data[tooltipItem.index]
                   let label = dataset.label
                   let dim = dataset.type == 'line' ? '%' : 'kWh'
-                  return `${label}: ${Math.round(currentValue)} ${dim}`
+                  return `${label}: ${currentValue.toFixed(1)} ${dim}`
                 }
             }
           },

@@ -58,7 +58,7 @@ Chart.controllers.StackedLine = Chart.controllers.line.extend({
 // 4. Generate the vue-chartjs component
 // First argument is the chart-id, second the chart type.
 const StackedLineChart = generateChart('line-stacked', 'StackedLine')
-
+import moment from 'moment'
 // 5. Extend the CustomLine Component just like you do with the default vue-chartjs charts.
 
 export default {
@@ -95,7 +95,7 @@ export default {
           xAxes: [ {
               scaleLabel: {
                   display: true,
-                  labelString: 'Zeit'
+                  labelString: 'Uhrzeit'
               },
             type: 'time',
             time: {
@@ -115,6 +115,25 @@ export default {
               borderDash: [5, 15]
             }
           }]
+        },
+        tooltips: {
+          mode: 'x',
+          backgroundColor: 'Ghostwhite',
+          bodyFontColor: 'DarkSlateGrey',
+          titleFontColor: 'DarkSlateGrey',
+          callbacks: {
+            title: (tooltipItem, data) => { 
+              let yLabel = data.datasets[0].data[tooltipItem[0].index].x          
+              return moment(yLabel).format('LLL')
+              },           
+            label: (tooltipItem, data) => {
+              let dataset = data.datasets[tooltipItem.datasetIndex]
+              let currentValue = dataset.data[tooltipItem.index].y
+              let label = dataset.label
+              let dim = 'kWh'
+              return `${label}: ${currentValue.toFixed(1)} ${dim}`
+            }
+          }
         },        
         legend: {
           display: true

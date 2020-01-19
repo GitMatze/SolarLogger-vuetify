@@ -5,13 +5,13 @@
     <!-- Desktop -->
     <v-card
       class="mx-auto my-4 hidden-xs-only "
-      max-width="1200"
+      max-width="1300"
       min-width="600"      
     >
       <v-list-item two-line>
         <v-list-item-content>
           <v-list-item-title class="headline">Aktuelle Werte</v-list-item-title>
-          <v-list-item-subtitle>{{ last_update_time}}</v-list-item-subtitle>
+          <v-list-item-subtitle>Letztes Update: {{ last_update_time}}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
   
@@ -51,7 +51,7 @@
 
       <v-card
       class="ma-auto my-4 pa-3"
-      max-width="1200"
+      max-width="1300"
       >
         <v-container max-width="40" class="d-flex justify-start">
             <h2 class="headline mr-9 pb-3 align-self-center hidden-xs-only">Tagesverlauf</h2>
@@ -140,6 +140,7 @@
   import APIService from '@/components/APIService'
 
   import moment from 'moment'
+  moment.locale('de');
 
   export default {
     components: { 
@@ -152,7 +153,7 @@
           chartDataStacked: '',
           pv_current: '_ _',
           grid_current: '_ _',
-          last_update_time: moment().format('dddd HH:mm:ss'),
+          last_update_time: '_ _ : _ _',
           refresh: false,
           date_max: null,
           date_min: null, 
@@ -163,7 +164,7 @@
             updateCurrentVals: {show: false, msg:''},
           },
           log :'',
-          date: new Date().toISOString().substr(0, 10),
+          date: moment().format().substr(0, 10),
           menu1: false,
           starttime: moment().startOf('day').format('HH:mm'),
           endtime: 'jetzt',
@@ -184,7 +185,7 @@
         this.getData()
         this.getMinMaxTime()
         this.updateCurrentVals() //first update immediately
-        // setInterval(this.updateCurrentVals, 4000);       
+        setInterval(this.updateCurrentVals, 4000);       
     },    
     methods: {
         async getMinMaxTime() {
@@ -281,7 +282,7 @@
             var rawData = await APIService.getCurrentVals()
             this.result = rawData
             if (rawData[0].pv == null){
-              this.errs.updateCurrentVals.msg = 'Der Sensor scheint keine Daten zu liefern.'
+              this.errs.updateCurrentVals.msg = 'Der Sensor scheint aktuell keine Daten zu liefern.'
               this.errs.updateCurrentVals.show = true
             }
             else if ( !(typeof rawData[0].pv == 'number') || !(typeof rawData[0].grid == 'number')) {
@@ -291,7 +292,7 @@
             else {
               this.pv_current = rawData[0].pv
               this.grid_current = rawData[0].grid
-              this.last_update_time = moment().format('dddd HH:mm:ss')
+              this.last_update_time = moment(rawData[0].time).format('dddd HH:mm:ss')
               this.errs.updateCurrentVals.show = false
 
             }

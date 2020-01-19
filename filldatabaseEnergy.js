@@ -67,9 +67,9 @@ var grid_day = {
     '17':100,
     '18':100,
     '19':200,
-    '20':100,
-    '21':100,
-    '22':50,
+    '20':1,
+    '21':1,
+    '22':0,
     '23':0,
     '24':0
 }
@@ -86,14 +86,14 @@ var month = ''
 var day_rand = 1
 var c = 0
 
-var start = '2019-06-23T13:10:00'
+var start = '2015-12-01T13:10:00'
 step = 10*60
 
 db.run('DELETE FROM energy')
 // console.log(typeof moment().subtract(10, 'hours').format('MM'))
 // console.log(grid_day[`${moment().subtract(i*4, 'seconds').format('kk')}`])
 
-for(var i = 0;i<35000; i++) {
+for(var i = 0;i<220000; i++) {
 
     c++;
 
@@ -106,7 +106,7 @@ for(var i = 0;i<35000; i++) {
         console.log(day_rand)
     }
     
-    pv_v = pv_v + (pv_day[hours] * pv_month[month] * day_rand - pv_v) * 0.04 + Math.random()*30-15
+    pv_v = pv_v + (pv_day[hours] * pv_month[month] * day_rand - pv_v) * 0.12 + Math.random()*30-15
     
     // console.log(`dayrand ${month} und pv ${pv_month['01']} und month ${pv_month[month]}`)
     if (pv_day[hours] == 0 || pv_v < 0) {pv_v = 0}
