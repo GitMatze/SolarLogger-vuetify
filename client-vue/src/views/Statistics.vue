@@ -84,6 +84,8 @@
             this.optionsMonths.date_min = result[0].min
             this.optionsDays.date_max = result[0].max
             this.optionsDays.date_min = result[0].min
+            this.optionsYears.date_max = result[0].max
+            this.optionsYears.date_min = result[0].min
           }
           catch (err) {
             this.errs.getMinMaxTime.msg = `Fehler beim Laden der Beschränkungen der Zeitauswahl: ${err}`

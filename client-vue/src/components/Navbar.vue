@@ -1,7 +1,7 @@
 <template>
     <nav>
         <v-app-bar app class="grey lighten-4" hide-on-scroll> 
-            <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
+            <!-- <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon> -->
             <v-toolbar-title class="text-uppercase light-green--text">
                 <span class="font-weight-light">Solar</span>
                 <span>Log</span>
@@ -22,7 +22,7 @@
             </template>
         </v-app-bar>
 
-        <v-navigation-drawer app v-model="drawer" class="grey lighten-4">
+        <!-- <v-navigation-drawer app v-model="drawer" class="grey lighten-4">
         <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="title">
@@ -49,7 +49,7 @@
             </v-list-item-content>
           </v-list-item>
         </v-list>
-      </v-navigation-drawer>
+      </v-navigation-drawer> -->
     </nav>
 
 </template>
@@ -60,7 +60,7 @@
 export default {
     data() {
         return {
-            drawer: false,
+            // drawer: false,
             links: [
                 {text: 'Übersicht', route: '/'},
                 {text: 'Statistiken', route: '/statistics'},

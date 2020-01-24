@@ -1,53 +1,8 @@
 <template>
   <div class="home">
     <v-container>
-    
-    <!-- Desktop -->
-    <v-card
-      class="mx-auto my-4 hidden-xs-only "
-      max-width="1300"
-      min-width="600"      
-    >
-      <v-list-item two-line>
-        <v-list-item-content>
-          <v-list-item-title class="headline">Aktuelle Werte</v-list-item-title>
-          <v-list-item-subtitle>Letztes Update: {{ last_update_time}}</v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
-  
-      <v-card-text>
-        <v-row align="center">
-          <v-col class="display-1" cols="6">
-            <span class="headline">Photovoltaik:</span> {{pv_current}} W
-          </v-col>
-          <v-col class="display-1" cols="6">
-            <span class="headline">Netz:</span> {{grid_current}} W
-          </v-col>          
-        </v-row>
-      </v-card-text>  
-    </v-card>
-
-    <!-- Phone -->
-    <v-card
-      class="mx-auto my-4 hidden-sm-and-up "                  
-    >
-    <v-simple-table>
-      <template v-slot:default>        
-        <tbody>
-          <tr>
-            <td>Photovoltaik</td>
-            <td>{{pv_current}} W</td>
-          </tr>
-          <tr>
-            <td>Netz</td>
-            <td>{{grid_current}} W</td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
-    </v-card>
-
-    <v-divider></v-divider>
+      <Statusbar/>
+      <v-divider></v-divider>
 
       <v-card
       class="ma-auto my-4 pa-3"
@@ -138,6 +93,7 @@
   import StackedLineChart from '@/components/StackedLineChart'
   import GradientLineChart from '@/components/GradientLineChart'
   import APIService from '@/components/APIService'
+  import Statusbar from '@/components/StatusBar'
 
   import moment from 'moment'
   moment.locale('de');
@@ -145,23 +101,20 @@
   export default {
     components: { 
         StackedLineChart,
-        GradientLineChart
+        GradientLineChart,
+        Statusbar
     },
     data () {
       return {
           chartData: '',
-          chartDataStacked: '',
-          pv_current: '_ _',
-          grid_current: '_ _',
-          last_update_time: '_ _ : _ _',
+          chartDataStacked: '',          
           refresh: false,
           date_max: null,
           date_min: null, 
           errs: {
             getMinMaxTime: {show: false, msg:''},
             getData: {show: false, msg:''},
-            checkPeriodFormat: {show: false, msg:''},
-            updateCurrentVals: {show: false, msg:''},
+            checkPeriodFormat: {show: false, msg:''},            
           },
           log :'',
           date: moment().format().substr(0, 10),
@@ -185,7 +138,7 @@
         this.getData()
         this.getMinMaxTime()
         this.updateCurrentVals() //first update immediately
-        setInterval(this.updateCurrentVals, 4000);       
+        setInterval(this.updateCurrentVals, 500);       
     },    
     methods: {
         async getMinMaxTime() {
@@ -276,32 +229,6 @@
           else {
             return true
           }                 
-        },
-        async updateCurrentVals() {
-          try {
-            var rawData = await APIService.getCurrentVals()
-            this.result = rawData
-            if (rawData[0].pv == null){
-              this.errs.updateCurrentVals.msg = 'Der Sensor scheint aktuell keine Daten zu liefern.'
-              this.errs.updateCurrentVals.show = true
-            }
-            else if ( !(typeof rawData[0].pv == 'number') || !(typeof rawData[0].grid == 'number')) {
-              this.errs.updateCurrentVals.msg = 'Unerwarter Fehler beim Updaten der Momentanwerte.'
-              this.errs.updateCurrentVals.show = true
-            }
-            else {
-              this.pv_current = rawData[0].pv
-              this.grid_current = rawData[0].grid
-              this.last_update_time = moment(rawData[0].time).format('dddd HH:mm:ss')
-              this.errs.updateCurrentVals.show = false
-
-            }
-          }
-          catch (err) {
-            this.errs.updateCurrentVals.msg = `Fehler beim Updaten der Momentanwerte: ${err.message}`
-            this.errs.updateCurrentVals.show = true
-          }
-
         }   
     }
   }

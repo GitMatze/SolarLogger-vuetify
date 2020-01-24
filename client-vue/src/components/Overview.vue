@@ -133,8 +133,8 @@
     },
 
     computed: {
-      formattedStartDate () {
-        return this.startdate<this.date_min 
+      formattedStartDate () {       
+        return moment(this.startdate).diff( moment(this.date_min)) <0 
         ? moment(this.date_min).format(this.options.format) 
         : moment(this.startdate).format(this.options.format)
       },
@@ -165,10 +165,10 @@
                   return
                 }
 
-                var pv = rawData.map(entry => entry.pv / 1000)
-                var grid_in = rawData.map(entry => entry.grid_in / 1000)
-                var grid_out = rawData.map(entry => entry.grid_out / 1000)
-                var pv_consumed = rawData.map(entry => (entry.pv - entry.grid_in) / 1000)
+                var pv = rawData.map(entry => entry.pv / 1e6)
+                var grid_in = rawData.map(entry => entry.grid_in / 1e6)
+                var grid_out = rawData.map(entry => entry.grid_out / 1e6)
+                var pv_consumed = rawData.map(entry => (entry.pv - entry.grid_in) / 1e6)
                 var eigen = rawData.map(entry => (entry.pv - entry.grid_in) / entry.pv * 100)
                 var autark = rawData.map(entry => (entry.pv - entry.grid_in) / (entry.pv - entry.grid_in + entry.grid_out) * 100)       
                 var labels = rawData.map(entry => moment(entry.time, this.options.apiReturnFormat).format(this.options.format))
@@ -258,9 +258,9 @@
             return false
           }
           else {
-              if ( moment(this.enddate).diff( moment(this.startdate), this.options.type) > 11) {
+              if ( moment(this.enddate).diff( moment(this.startdate), this.options.type) > 12) {
 
-                  this.enddate = moment(this.startdate).add(11, this.options.type).format()  
+                  this.enddate = moment(this.startdate).add(12, this.options.type).format()  
               }
             return true
           }                 

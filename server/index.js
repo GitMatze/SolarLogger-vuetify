@@ -13,7 +13,7 @@ const api = require('./routes/api/api');
 app.use('/api', api);
 
 // Handle production
-if (process.env.NODE_ENV === 'production') {
+if (true) { //process.env.NODE_ENV === 'production') {
   // Static folder
   app.use(express.static(__dirname + '/public/'));
 

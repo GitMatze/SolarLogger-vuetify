@@ -49,16 +49,14 @@ class APIService {
     static getCurrentVals() {
         return new Promise(async (resolve, reject) => {
             try{
-              const res = await axios.get( 'api/power/current' )
+              const res = await axios.get( 'api/current' )
               const data = res.data                 
               resolve(data)
           } catch(err) {
               reject(err)
           }
-      })
-
-        
-    }   
+      })        
+    }       
 }
 
 export default APIService
