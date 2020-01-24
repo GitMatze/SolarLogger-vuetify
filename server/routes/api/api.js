@@ -216,7 +216,7 @@ router.post('/pv', async (req, res) => {
   pv_update_status.pow_new = true
   pv_update_status.en_new = true
   pv_update_status.time = moment().format()
-  console.log(`New pv energy value: ${req.body.power}`) 
+  console.log(`New pv power value: ${req.body.power}`) 
   res.status(201).send();
 });
 
@@ -311,9 +311,9 @@ function energyToPower(energy){
     if (i<energy.length-1) {
       
       return {
-        pv:   ( energy[i+1].pv - entry.pv ) / ( timeDiff(entry.time, energy[i+1].time) / 3600 ),
+        pv:   ( energy[i+1].pv - entry.pv ) /  timeDiff(entry.time, energy[i+1].time) * 3600 / 1e3,
         grid: ( energy[i+1].grid_out - energy[i+1].grid_in - (entry.grid_out - entry.grid_in) ) / 
-              ( timeDiff(entry.time, energy[i+1].time) / 3600 ),
+               timeDiff(entry.time, energy[i+1].time) * 3600 / 1e3 ,
         time: entry.time
       }
     }

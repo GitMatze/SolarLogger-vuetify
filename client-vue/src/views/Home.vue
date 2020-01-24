@@ -137,8 +137,6 @@
     async created() {
         this.getData()
         this.getMinMaxTime()
-        this.updateCurrentVals() //first update immediately
-        setInterval(this.updateCurrentVals, 500);       
     },    
     methods: {
         async getMinMaxTime() {
