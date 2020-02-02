@@ -45,7 +45,7 @@ router.get('/MinMaxTime', (req, res) => {
 })
 
 router.get('/current', (req, res) => {
-  // console.log(`Sending current values, pv :${current_power.pv}, grid :${current_power.grid}`)
+  console.log(`Sending current values, pv :${current_power.pv}, grid :${current_power.grid}`)
   var time = grid_update_status.time < pv_update_status.time ?  // select oldest time stamp
       grid_update_status.time : pv_update_status.time 
   res.send( [{power: current_power, energy: current_energy, time: time}] )        
