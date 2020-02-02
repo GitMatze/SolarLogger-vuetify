@@ -233,7 +233,7 @@ router.post('/grid', async (req, res) => {
 
 // Handle SPA
 router.get('/download', (req, res) => {  
-  res.download("C:/Users/Matthias/Documents/GitHub/SolarLogger-vuetify/db.db", 'database.db')
+  res.download('db.db')
 }); 
 
 

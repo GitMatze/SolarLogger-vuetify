@@ -134,8 +134,8 @@
 
     computed: {
       formattedStartDate () {       
-        return moment(this.startdate).diff( moment(this.date_min)) <0 
-        ? moment(this.date_min).format(this.options.format) 
+        return moment(this.startdate).diff( moment(this.options.date_min)) <0 
+        ? moment(this.options.date_min).format(this.options.format) 
         : moment(this.startdate).format(this.options.format)
       },
       formattedEndDate () {
