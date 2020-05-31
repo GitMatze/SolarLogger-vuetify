@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <v-container>
-      <Statusbar/>
+      <StatusbarHeating/>
       <v-divider></v-divider>
 
       <v-card
@@ -23,7 +23,7 @@
                 readonly
                 dense
                 filled
-                color='#bcd497'
+                color='#3366CC'
                 label="Datum"
                 v-on="on"
                 @click:clear="date = null"
@@ -34,7 +34,7 @@
               no-title
               :max="date_max"
               :min="date_min"
-              color='#bcd497'
+              color='#3366CC'
               @change="getData"
               @click:date="menu1=false"
             ></v-date-picker>
@@ -44,7 +44,7 @@
             label="Anfang"
             filled
             dense
-            color='#bcd497'
+            color='#3366CC'
             v-on:keyup.enter="getData"
           ></v-text-field>
            <v-text-field
@@ -52,7 +52,7 @@
             label="Ende"
             filled
             dense
-            color='#bcd497'
+            color='#3366CC'
             v-on:keyup.enter="getData"
 
           ></v-text-field>
@@ -71,43 +71,30 @@
         <v-divider></v-divider>
 
         <v-container class="mx-auto my-2">
-          <h2 class="title d-flex justify-space-between"> Leistung von PV und Netz </h2>
-         <GradientLineChart chart-id="line-daily" :chartData="chartData" :refresh="refresh"/> 
-        </v-container>
-
-        <v-divider></v-divider>
-               
-        <v-container class="mx-auto my-2">
-          <h2 class="title d-flex justify-space-between"> Stromverbrauch </h2>
-         <StackedLineChart chart-id="line-stacked1" :chartData="chartDataStacked" :refresh="refresh"/>
-        </v-container>
-      </v-card>
-
-  
-      
+          <h2 class="title d-flex justify-space-between"> Speichertemperatur </h2>
+         <TempChart chart-id="line-daily" :chartData="chartData" :refresh="refresh"/> 
+        </v-container>     
+      </v-card>      
     </v-container>     
   </div>
 </template>
 
 <script>
-  import StackedLineChart from '@/components/StackedLineChart'
-  import GradientLineChart from '@/components/GradientLineChart'
+  import TempChart from '@/components/heating/TempChart'
   import APIService from '@/components/APIService'
-  import Statusbar from '@/components/StatusBar'
+  import StatusbarHeating from '@/components/heating/StatusBarHeating'
 
   import moment from 'moment'
   moment.locale('de');
 
   export default {
     components: { 
-        StackedLineChart,
-        GradientLineChart,
-        Statusbar
+        TempChart,
+        StatusbarHeating
     },
     data () {
       return {
           chartData: '',
-          chartDataStacked: '',          
           refresh: false,
           date_max: null,
           date_min: null, 
@@ -141,7 +128,7 @@
     methods: {
         async getMinMaxTime() {
           this.errs.getMinMaxTime.show = false
-          var result = await APIService.getMinMaxTime("energy")
+          var result = await APIService.getMinMaxTime("water_temp")
           if (result[0].max==undefined) {
             this.errs.getMinMaxTime.msg = 'Keine Beschränkungen für Zeitauswahl empfangen.'
             this.errs.getMinMaxTime.show=true
@@ -155,49 +142,24 @@
             try {
                 this.errs.getData.show = false
                 this.loaded = false
-                var rawData = await APIService.getPower(this.period)
+                var rawData = await APIService.getWaterTemp(this.period)
                 if (rawData[1]==undefined) {
                   this.errs.getData.msg= 'Keine Daten empfangen.'
                   this.errs.getData.show = true
                   return
                 }         
-                var pv = rawData.map(entry => 
-                   ({x: entry.time, y: entry.pv}))
-                var grid = rawData.map(entry => 
-                   ({x: entry.time, y: entry.grid}))
-                var pv_stacked = rawData.map(entry => 
-                   ({x: entry.time, y: entry.pv+entry.grid}))
+                var temp = rawData.map(entry => 
+                   ({x: entry.time, y: entry.temp}))                  
 
                  this.chartData = {                     
-                     datasets: [
-                         {label: 'Netz',
+                     datasets: [                     
+                         {label: 'Temperatur',
+                         borderColor: 'rgba(51, 102, 204, 1)',
+                         backgroundColor: 'rgba(51, 102, 204, 1)',
                          yAxisID : 'y-axis-0',
-                         borderColor: 'rgba(188, 212, 83, 1)',
-                         backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: grid
-                         },
-                         {label: 'PV',
-                         borderColor: 'rgba(248, 212, 83, 1)',
-                         backgroundColor: 'rgba(248, 212, 83, 1)',
-                         yAxisID : 'y-axis-0',
-                         data: pv
+                         data: temp
                          }]
-                 }
-                 this.chartDataStacked = {                     
-                     datasets: [
-                         {label: 'Netz',
-                         yAxisID : 'y-axis-0',
-                         borderColor: 'rgba(188, 212, 83, 1)',
-                         backgroundColor: 'rgba(188, 212, 83, 1)',
-                         data: grid
-                         },
-                         {label: 'PV',
-                         borderColor: 'rgba(248, 212, 83, 1)',
-                         backgroundColor: 'rgba(248, 212, 83, 1)',
-                         yAxisID : 'y-axis-0',
-                         data: pv_stacked
-                         }]
-                 }
+                 }              
                  this.loaded = true //TODO loaded is not used at all
                  this.refresh = !this.refresh                
             } catch(err) {

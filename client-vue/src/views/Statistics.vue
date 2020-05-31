@@ -79,7 +79,7 @@
         async getMinMaxTime() {
           this.errs.getMinMaxTime.show = false
           try {
-            var result = await APIService.getMinMaxTime()            
+            var result = await APIService.getMinMaxTime("energy")            
             this.optionsMonths.date_max = result[0].max  // TODO more elegant?
             this.optionsMonths.date_min = result[0].min
             this.optionsDays.date_max = result[0].max

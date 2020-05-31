@@ -5,39 +5,63 @@ const moment = require('moment');
 const db = new sqlite3.Database('db.db');
 const router = express.Router();
 
-var t_max = {energy: null, power: null} //stores min and max time of entries in database
-var t_min = {energy: null, power: null}
+// var t_max = {energy: null, power: null} //stores min and max time of entries in database
+// var t_min = {energy: null, power: null}
 
 var current_power = {pv: null, grid: 1}
 var current_energy = {pv: null, grid_in: 1, grid_out: 1}
+var current_water = {water_temp: null, is_heating: null}
 
 var grid_update_status = {time: null, pow_new: false, en_new: false}
 var pv_update_status = {time: null, pow_new: false, en_new: false}
+var water_update_status = {time: null, new: false}
 
 const sql_groups= {
   month: '%Y %m', 
   day: '%Y %m %d',
   year: '%Y' }  // used for queries of aggregated data
 
-updateMinMaxTime() //load on startup
+// updateMinMaxTime() //load on startup
 
 setInterval(insertEnergy, 10*60*1000)
 setInterval(insertPower, 2*1000)
 setInterval(deleteOldEntries, 10*60*1000)
+setInterval(insertWatertemp, 10*60*1000) 
 
-router.get('/MinMaxTime', (req, res) => {
-  updateMinMaxTime()  //TODO energy is redundant 
+router.get('/MinMaxTime/:type', (req, res) => {
+  const type = req.params.type
+
   try {
-    db.all(`SELECT MIN(time) min, MAX(time) max FROM energy`,
-    (err, rows) => {
-      if (rows[0].max != undefined) {
-        //console.log(rows.length)
-        res.send(rows);        
-      } 
-      else { 
-        res.send( [{}])
-      }    
-    })
+
+    switch (type) {
+      case "energy": 
+        db.all(`SELECT MIN(time) min, MAX(time) max FROM energy`,
+        (err, rows) => {
+        if (rows[0].max != undefined) {
+          //console.log(rows.length)
+          res.send(rows);        
+        } 
+        else { 
+          res.send( [{}])
+        }    
+        })
+        break
+      case "water_temp":
+        db.all(`SELECT MIN(time) min, MAX(time) max FROM water_temp`,
+        (err, rows) => {
+        if (rows[0].max != undefined) {
+          //console.log(rows.length)
+          res.send(rows);        
+        } 
+        else { 
+          res.send( [{}])
+        }    
+        })
+        break
+      default: 
+        res.send( [{}])    
+    }
+  // updateMinMaxTime()  //TODO energy is redundant    
   }
   catch {
     res.send( [{}] )
@@ -49,6 +73,12 @@ router.get('/current', (req, res) => {
   var time = grid_update_status.time < pv_update_status.time ?  // select oldest time stamp
       grid_update_status.time : pv_update_status.time 
   res.send( [{power: current_power, energy: current_energy, time: time}] )        
+})
+
+router.get('/current_water_temp', (req, res) => {
+  console.log(`Sending current values, temp :${current_water.water_temp}`)
+  var time = water_update_status.time
+  res.send( [{water_temp: current_water.water_temp, is_heating: current_water.is_heating, time: time}] )        
 })
 
 
@@ -127,6 +157,55 @@ router.get('/power/:period', (req, res) => {
   }
 })
 
+router.get('/water_temp/:period', (req, res) => {
+  const periods = req.params.period.split('_');
+  console.log('') 
+  console.log(`Starttime: ${periods[0]}`)
+  console.log(`Endtime: ${periods[1]}`)
+  
+  //var t_diff = timeDiff(periods[0], t_min['power']) 
+  //console.log(`Time Difference to PowerMin:  ${t_diff}s, ${t_diff/4}*4s, ${t_diff/60}min`)
+  
+  // if requested start date is further back than the start of the power database,
+  // use energy database
+ 
+modu = getFilterConstant(periods[0], periods[1], 10*60, 250)     
+periods[0] = moment(periods[0]).subtract(10, 'minutes').format()
+periods[1] = moment(periods[1]).add(10, 'minutes').format()       
+
+db.all(
+  `SELECT temp, datetime(time, "localtime") time 
+  FROM water_temp 
+  WHERE time>datetime($start) AND time<datetime($end) AND id%$mod=0 
+  ORDER BY 2 DESC`,
+  {
+    $start: periods[0],
+    $end: periods[1],
+    $mod: modu
+  },
+  (err, rows) => {
+    if (err) {
+      console.log(`Database fetch not successful, Error: ${err.message}`)
+      res.send([{}]);
+    }
+    if (rows.length == 0) {
+      console.log(`Empty database return`)
+      res.send([{}]);
+    }
+    else {
+      try {
+        console.log(`Length of sent data ${rows.length}`)
+        res.send(rows);
+      }
+      catch (e){
+        res.send([{}]);
+        console.log(`Power Conversion failed, Error: ${e.message}`)
+      }
+    } 
+  })
+  
+})
+
 router.get('/energy/:data', (req, res) => {
   const data = req.params.data.split('_')
   const type = data[0]
@@ -169,46 +248,32 @@ router.get('/energy/:data', (req, res) => {
   }
 })
 
-/* router.post('/power', async (req, res) => { // TODO catch undefineds...
-  db.run( 
-    'INSERT INTO power (pv, grid, time) VALUES ($pv, $grid, datetime($time))',
-    {
-      $pv: req.body.pv,
-      $grid: req.body.grid,
-      $time: moment().format()
-    },
-    (err) => {
-        if(err) { console.log(err.message) }
-        else { 
-          console.log(`Added new Value to power: pv: ${req.body.pv}, grid : ${req.body.grid}`)
-          current_power.pv = req.body.pv
-          current_power.grid = req.body.grid
-          current_power.time = moment().format()
-        }
-    })
-  res.status(201).send();
-});
-
-router.post('/energy', async (req, res) => { // TODO catch undefineds...
-  db.run( 
-    'INSERT INTO energy (pv, grid_in, grid_out, time) VALUES ($pv, $grid_in, $grid_out, datetime($time))',
-    {
-      $pv: req.body.pv,
-      $grid_in: req.body.grid_in,
-      $grid_out: req.body.grid_out,
-      $time: moment().format()
-    },
-    (err) => {
-        if(err) { console.log(err.message) }
-        else { 
-          console.log(`Added new Value to power: pv: ${req.body.pv}, grid : ${req.body.grid}`)
-          current_power.pv = req.body.pv
-          current_power.grid = req.body.grid
-          current_power.time = moment().format()
-        }
-    })
-  res.status(201).send();
-}); */
+// api for heating control of water storage
+// THIS ACTS AS THE POST METHOD AS WELL
+router.get('/water_control/:data', (req, res) => {
+  try {
+  const data = req.params.data.split('_')
+  const temp = parseInt(data[0])  // current water temperature
+  const req_power = parseInt(data[1]) // requested power
+  console.log('')
+  console.log('GET REQUEST water_control')
+  console.log(data)
+  
+    enough_power = req_power+current_power.grid<0
+    current_water.water_temp = temp
+    current_water.is_heating = enough_power
+    water_update_status.new = true
+    water_update_status.time = moment().format()
+    console.log(`New water temp value: ${temp}`)
+    response = enough_power && temp<60 ? "y": "n"    
+    res.send([ {heat_on: response, grid: current_power.grid} ])    
+  }
+  catch (err) {
+    console.log("GET heat error")
+    console.log(err)
+    res.send( [{}] )
+  }
+})
 
 router.post('/pv', async (req, res) => { 
   current_power.pv = req.body.power
@@ -282,6 +347,25 @@ function insertPower() {
     }
 }
 
+function insertWatertemp() {
+  if (water_update_status.new) {
+    var time = water_update_status.time
+    db.run( 
+      'INSERT INTO water_temp (temp, time) VALUES ($temp, datetime($time))',
+      {
+        $temp: current_water.water_temp,
+        $time: time
+      },
+      (err) => {
+          if(err) { console.log(`Error at insertWatertemp(): ${err.message}`) }
+          else { 
+            console.log(`Insert Watertemp, temp: ${current_water.water_temp}`)
+            water_update_status.new = false
+          }
+      })
+    }
+}
+
 function deleteOldEntries() {
   var min_time = moment().subtract(2, 'days').format()
   db.run( 
@@ -328,34 +412,34 @@ function energyToPower(energy){
   return power
 }
 
-function updateMinMaxTime() { //TODO: get rid of repetition by passing an argument
-  db.all('SELECT MIN(time) min, MAX(time) max FROM energy',
-  (err, rows) => {
-    console.log('updateMINMAX: ')
-    console.log(rows);
-    if (rows.length > 0) {
-      //console.log(rows.length)
-      //res.send(rows);
-      t_min['energy'] = rows[0].min
-      t_max['energy'] = rows[0].max
-    } 
-  }
-  )
-  db.all('SELECT MIN(time) min, MAX(time) max FROM power',
-  (err, rows) => {
-    console.log('updateMINMAX: ')
-    console.log(rows);
-    if (rows.length > 0) {
-      //console.log(rows.length)
-      //res.send(rows);
-      t_min['power'] = rows[0].min
-      t_max['power'] = rows[0].max
-      console.log(rows[0].max)
-      console.log(t_max['power'])
-    } 
-  }
-  )
-}
+// function updateMinMaxTime() { //TODO: get rid of repetition by passing an argument
+//   db.all('SELECT MIN(time) min, MAX(time) max FROM energy',
+//   (err, rows) => {
+//     console.log('updateMINMAX: ')
+//     console.log(rows);
+//     if (rows.length > 0) {
+//       //console.log(rows.length)
+//       //res.send(rows);
+//       t_min['energy'] = rows[0].min
+//       t_max['energy'] = rows[0].max
+//     } 
+//   }
+//   )
+//   db.all('SELECT MIN(time) min, MAX(time) max FROM power',
+//   (err, rows) => {
+//     console.log('updateMINMAX: ')
+//     console.log(rows);
+//     if (rows.length > 0) {
+//       //console.log(rows.length)
+//       //res.send(rows);
+//       t_min['power'] = rows[0].min
+//       t_max['power'] = rows[0].max
+//       console.log(rows[0].max)
+//       console.log(t_max['power'])
+//     } 
+//   }
+//   )
+// }
 
   
 // returns time difference in seconds

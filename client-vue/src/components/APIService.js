@@ -3,10 +3,10 @@ import axios from 'axios'
 
 class APIService {
     
-    static getMinMaxTime(){
+    static getMinMaxTime(type){        
         return new Promise(async (resolve, reject) => {
               try{
-                const res = await axios.get( 'api/MinMaxTime' )
+                const res = await axios.get( 'api/MinMaxTime/'.concat(type) )
                 const data = res.data                 
                 resolve(data)
             } catch(err) {
@@ -56,7 +56,30 @@ class APIService {
               reject(err)
           }
       })        
-    }       
+    }
+    static getCurrentWaterTemp() {
+        return new Promise(async (resolve, reject) => {
+            try{
+              const res = await axios.get( 'api/current_water_temp' )
+              const data = res.data                 
+              resolve(data)
+          } catch(err) {
+              reject(err)
+          }
+      })        
+    }  
+    static getWaterTemp(period) {
+        // var periods = 'api/power/2020-01-14T14:23:30+01:00_2020-01-14T14:23:50+01:00'
+        return new Promise(async (resolve, reject) => {           
+            try{
+                const res = await axios.get( 'api/water_temp/'.concat(period) )
+                const data = res.data
+                resolve(data)
+            } catch(err) {
+                reject(err)
+            }
+        })
+    }        
 }
 
 export default APIService

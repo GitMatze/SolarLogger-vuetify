@@ -31,15 +31,16 @@ c_m.on('ready', function() {
 });
 
 var CronJob = require('cron').CronJob;
-var job_daily = new CronJob('0 0 0 * * *', function() {
+var job_daily = new CronJob('0 0 1 * * *', function() {
   try {
     c_d.connect({host: 'fritz.box', user: 'solarlogger', password: 'einpasswort'});
+    console.log('daily job')
   }
   catch (err) { console.log(`Daily Client Connction Error: ${err.message}`) }
 }, null, true);
 
 //safe monthly 
-var job_monthly = new CronJob('0 0 0 1 * *', function() {
+var job_monthly = new CronJob('0 0 1 1 * *', function() {
   try {
     c_m.connect({host: 'fritz.box', user: 'solarlogger', password: 'einpasswort'});
   }

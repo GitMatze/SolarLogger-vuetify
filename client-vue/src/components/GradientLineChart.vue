@@ -119,7 +119,7 @@ export default {
               let dataset = data.datasets[tooltipItem.datasetIndex]
               let currentValue = dataset.data[tooltipItem.index].y
               let label = dataset.label
-              let dim = 'kWh'
+              let dim = 'W'
               return `${label}: ${currentValue.toFixed(1)} ${dim}`
             }
           }

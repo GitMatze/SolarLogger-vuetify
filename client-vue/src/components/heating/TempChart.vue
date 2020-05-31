@@ -4,51 +4,30 @@ import Chart from 'chart.js'
 // 2. Import the `generateChart()` method to create the vue component.
 import { generateChart } from 'vue-chartjs'
 
+Chart.Legend.prototype.afterFit = function() {
+    this.height = this.height + 15;  // increases spacing between legend and plot
+};
 // 3. Extend one of the default charts
 // http://www.chartjs.org/docs/latest/developers/charts.html
-Chart.defaults.StackedLine = Chart.defaults.line;
-Chart.controllers.StackedLine = Chart.controllers.line.extend({
+Chart.defaults.Temp = Chart.defaults.line;
+Chart.controllers.Temp = Chart.controllers.line.extend({
     update: function() {
-    // get the min and max values
-    var min = this.chart.data.datasets[0].data.reduce((min, p) => p.y < min ? p.y : min, this.chart.data.datasets[0].data[0].y);
-    var max = this.chart.data.datasets[0].data.reduce((max, p) => p.y > max ? p.y : max, this.chart.data.datasets[0].data[0].y);
-    var yScale = this.getScaleForId(this.getDataset().yAxisID);
 
-    // figure out the pixels for these and the value 0
-    var top = yScale.getPixelForValue(max);
-    var zero = yScale.getPixelForValue(0);
-    var bottom = yScale.getPixelForValue(min);
-
-    // build a gradient that switches color at the 0 point
     var ctx = this.chart.chart.ctx;
-    var gradient = ctx.createLinearGradient(0, top, 0, bottom);
-    var ratio = Math.min((zero - top) / (bottom - top), 1);
-    /* eslint-disable no-console */
-     /*  console.log(`RATIO:  ${ratio}`); 
-      console.log(`min:  ${min}`); 
-      console.log(`max:  ${max}`);   */   
-    /* eslint-enable no-console */
-    ratio = Math.max(ratio,0)
-    gradient.addColorStop(0, 'rgba(188, 212, 151, 0.9)');
-    gradient.addColorStop(ratio, 'rgba(188, 212, 151, 0.9)');
-    gradient.addColorStop(ratio, 'rgba(248, 212, 83, 0.5)');
-    gradient.addColorStop(1, 'rgba(248, 212, 83, 0.5)');
-    this.chart.data.datasets[0].backgroundColor = ratio==1 ? 'rgba(188, 212, 151, 0.9)' 
-                              : ( ratio==0 ? 'rgba(248, 212, 83, 0.5)' : gradient)
-    this.chart.data.datasets[1].backgroundColor = 'rgba(248,212,83, 0.5)';
+    var gradient = ctx.createLinearGradient(0, 0, 0, 40)
+    gradient.addColorStop(0, 'rgba(51, 102, 204, 0.9)')
+    gradient.addColorStop(0.5, 'rgba(51, 102, 204, 0.6)')
+    gradient.addColorStop(1, 'rgba(51, 102, 204, 0.3)')
     
+    this.chart.data.datasets[0].backgroundColor = gradient
+
+    this.chart.data.datasets[0].borderWidth = 2
+
     this.chart.data.datasets[0].pointRadius = 0
-    this.chart.data.datasets[1].pointRadius = 0
-
-    this.chart.data.datasets[0].borderWidth = 0
-    this.chart.data.datasets[1].borderWidth = 0
-
+    
     this.chart.data.datasets[0].cubicInterpolationMode = 'monotone'
-    this.chart.data.datasets[1].cubicInterpolationMode = 'monotone'
 
-    this.chart.data.datasets[0].borderColor = 'ghostwhite' // 'rgba(207, 180, 149, 0.9)'
-    this.chart.data.datasets[1].borderColor = 'ghostwhite' // 'rgba(240, 207, 133, 0.3)'
-
+    this.chart.data.datasets[0].borderColor = 'rgba(51, 102, 204, 1)'
 
 
     return Chart.controllers.line.prototype.update.apply(this, arguments);
@@ -57,12 +36,13 @@ Chart.controllers.StackedLine = Chart.controllers.line.extend({
 
 // 4. Generate the vue-chartjs component
 // First argument is the chart-id, second the chart type.
-const StackedLineChart = generateChart('line-stacked', 'StackedLine')
+const TempChart = generateChart('line-gradient', 'Temp')
 import moment from 'moment'
+
 // 5. Extend the CustomLine Component just like you do with the default vue-chartjs charts.
 
 export default {
-  extends: StackedLineChart,
+  extends: TempChart,
   props: {
       chartData: {
         required: false
@@ -81,7 +61,7 @@ export default {
           yAxes: [{
               scaleLabel: {
                   display: true,
-                  labelString: 'Leistung in W'
+                  labelString: 'Temperatur in °C'
               },
             ticks: {
               beginAtZero: true,              
@@ -125,12 +105,12 @@ export default {
             title: (tooltipItem, data) => { 
               let yLabel = data.datasets[0].data[tooltipItem[0].index].x          
               return moment(yLabel).format('LLL')
-              },           
+              },
             label: (tooltipItem, data) => {
               let dataset = data.datasets[tooltipItem.datasetIndex]
               let currentValue = dataset.data[tooltipItem.index].y
               let label = dataset.label
-              let dim = 'W'
+              let dim = '°C'
               return `${label}: ${currentValue.toFixed(1)} ${dim}`
             }
           }
