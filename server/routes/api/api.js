@@ -5,8 +5,8 @@ const moment = require('moment');
 const db = new sqlite3.Database('db.db');
 const router = express.Router();
 
-// var t_max = {energy: null, power: null} //stores min and max time of entries in database
-// var t_min = {energy: null, power: null}
+var t_max = {energy: null, power: null} //stores min and max time of entries in database
+var t_min = {energy: null, power: null}
 
 var current_power = {pv: null, grid: 1}
 var current_energy = {pv: null, grid_in: 1, grid_out: 1}
@@ -21,7 +21,7 @@ const sql_groups= {
   day: '%Y %m %d',
   year: '%Y' }  // used for queries of aggregated data
 
-// updateMinMaxTime() //load on startup
+updateMinMaxTime() //load on startup
 
 setInterval(insertEnergy, 10*60*1000)
 setInterval(insertPower, 2*1000)
@@ -412,34 +412,34 @@ function energyToPower(energy){
   return power
 }
 
-// function updateMinMaxTime() { //TODO: get rid of repetition by passing an argument
-//   db.all('SELECT MIN(time) min, MAX(time) max FROM energy',
-//   (err, rows) => {
-//     console.log('updateMINMAX: ')
-//     console.log(rows);
-//     if (rows.length > 0) {
-//       //console.log(rows.length)
-//       //res.send(rows);
-//       t_min['energy'] = rows[0].min
-//       t_max['energy'] = rows[0].max
-//     } 
-//   }
-//   )
-//   db.all('SELECT MIN(time) min, MAX(time) max FROM power',
-//   (err, rows) => {
-//     console.log('updateMINMAX: ')
-//     console.log(rows);
-//     if (rows.length > 0) {
-//       //console.log(rows.length)
-//       //res.send(rows);
-//       t_min['power'] = rows[0].min
-//       t_max['power'] = rows[0].max
-//       console.log(rows[0].max)
-//       console.log(t_max['power'])
-//     } 
-//   }
-//   )
-// }
+function updateMinMaxTime() { //TODO: get rid of repetition by passing an argument
+  db.all('SELECT MIN(time) min, MAX(time) max FROM energy',
+  (err, rows) => {
+    console.log('updateMINMAX: ')
+    console.log(rows);
+    if (rows.length > 0) {
+      //console.log(rows.length)
+      //res.send(rows);
+      t_min['energy'] = rows[0].min
+      t_max['energy'] = rows[0].max
+    } 
+  }
+  )
+  db.all('SELECT MIN(time) min, MAX(time) max FROM power',
+  (err, rows) => {
+    console.log('updateMINMAX: ')
+    console.log(rows);
+    if (rows.length > 0) {
+      //console.log(rows.length)
+      //res.send(rows);
+      t_min['power'] = rows[0].min
+      t_max['power'] = rows[0].max
+      console.log(rows[0].max)
+      console.log(t_max['power'])
+    } 
+  }
+  )
+}
 
   
 // returns time difference in seconds
