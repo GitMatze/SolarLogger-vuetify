@@ -14,10 +14,11 @@ Chart.controllers.Temp = Chart.controllers.line.extend({
     update: function() {
 
     var ctx = this.chart.chart.ctx;
-    var gradient = ctx.createLinearGradient(0, 0, 0, 40)
-    gradient.addColorStop(0, 'rgba(51, 102, 204, 0.9)')
-    gradient.addColorStop(0.5, 'rgba(51, 102, 204, 0.6)')
-    gradient.addColorStop(1, 'rgba(51, 102, 204, 0.3)')
+    var gradient = ctx.createLinearGradient(0, 0, 0, 500)
+    gradient.addColorStop(0.1, 'rgba(51, 102, 204, 1)')
+    gradient.addColorStop(0.4, 'rgba(51, 102, 204, 0.6)')
+    gradient.addColorStop(0.5, 'rgba(51, 102, 204, 0.4')
+    gradient.addColorStop(1, 'rgba(51, 102, 204, 0')
     
     this.chart.data.datasets[0].backgroundColor = gradient
 
