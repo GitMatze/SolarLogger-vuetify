@@ -99,6 +99,22 @@ router.get('/period/:period/:type', async (req, res) => {
   } 
 })
 
+router.get('/energy/:data', async (req, res) => {
+  try {
+    const data = req.params.data.split('_')
+    const type = data[0]
+    const period = [ data[1], data[2] ]
+    console.log('')
+    console.log('GET REQUEST statistics')
+    console.log(data)
+    const rows = await dm.getEnergyStats(type, period[0], period[1])
+    res.send( rows) 
+  } catch(err) {
+    res.send([{}])
+  }
+
+})
+
 
 
 

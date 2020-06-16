@@ -20,6 +20,11 @@ for (name of names) {
     update_status[name]=false
 }
 
+const sql_groups= {  
+    month: '%Y %m', 
+    day: '%Y %m %d',
+    year: '%Y' }  // used for queries of aggregated data
+
 intervals = {energy:10*60*1000,
             power: 2*1000,
             water_temp:10*60*1000,
@@ -142,6 +147,44 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
         } 
     })
 } 
+
+module.exports.getEnergyStats= async function(type, start, end) {
+    return new Promise((resolve, reject) => {
+        try { 
+            db.all(`SELECT STRFTIME($sql, datetime(time, 'localtime')) time, 
+            MAX(pv)-MIN(pv) pv, 
+            MAX(grid_in)-MIN(grid_in) grid_in, 
+            MAX(grid_out)-MIN(grid_out) grid_out 
+            FROM energy
+            WHERE time>datetime($start) AND time<datetime($end) 
+            GROUP BY STRFTIME($sql, datetime(time, 'localtime')) 
+            ORDER BY 1
+            LIMIT 12`,
+            {
+              $sql: sql_groups[type], 
+              $start: start,
+              $end: end,
+            },
+            (err, rows) => {
+              if (err) {
+                console.log(`SQL Error: ${err.message}`)
+                reject([{}])
+              }
+              else if (rows.length > 0 ) { // TODO row = undefined not catched
+                console.log(`Number of data entries: ${rows.length}`)
+                resolve(rows);        
+              } 
+              else { 
+                console.log('Request Failed')
+                reject( [{}])
+              }    
+            })
+        }
+        catch {
+            reject( [{}] )
+        }
+    })     
+}
 
 function getFilterConstant(start, end, interval, output_num) {
     var tdiff = timeDiff(start, end)
