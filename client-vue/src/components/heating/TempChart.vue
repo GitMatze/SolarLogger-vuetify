@@ -15,16 +15,16 @@ Chart.controllers.Temp = Chart.controllers.line.extend({
 
     var ctx = this.chart.chart.ctx;
     var gradient = ctx.createLinearGradient(0, 0, 0, 500)
-    gradient.addColorStop(0.1, 'rgba(51, 102, 204, 1)')
-    gradient.addColorStop(0.4, 'rgba(51, 102, 204, 0.6)')
-    gradient.addColorStop(0.5, 'rgba(51, 102, 204, 0.4')
+    gradient.addColorStop(0.1, 'rgba(51, 102, 204, 0.8)')
+    // gradient.addColorStop(0.45, 'rgba(51, 102, 204, 0.65)')
+    gradient.addColorStop(0.6, 'rgba(51, 102, 204, 0.35')
     gradient.addColorStop(1, 'rgba(51, 102, 204, 0')
     
     this.chart.data.datasets[0].backgroundColor = gradient
 
     this.chart.data.datasets[0].borderWidth = 2
 
-    this.chart.data.datasets[0].pointRadius = 0
+    this.chart.data.datasets[0].pointRadius = 1
     
     this.chart.data.datasets[0].cubicInterpolationMode = 'monotone'
 

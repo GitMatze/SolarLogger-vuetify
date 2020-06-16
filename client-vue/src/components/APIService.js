@@ -34,52 +34,30 @@ class APIService {
 
     }
 
-    static getPower(period) {
-        // var periods = 'api/power/2020-01-14T14:23:30+01:00_2020-01-14T14:23:50+01:00'
-        return new Promise(async (resolve, reject) => {           
-            try{
-                const res = await axios.get( 'api/power/'.concat(period) )
-                const data = res.data
-                resolve(data)
-            } catch(err) {
-                reject(err)
-            }
-        })
-    }
-    static getCurrentVals() {
+    static getCurrent(type) {
         return new Promise(async (resolve, reject) => {
             try{
-              const res = await axios.get( 'api/current' )
+              const res = await axios.get( `api/current/${type}` )
               const data = res.data                 
               resolve(data)
           } catch(err) {
               reject(err)
           }
       })        
-    }
-    static getCurrentWaterTemp() {
-        return new Promise(async (resolve, reject) => {
-            try{
-              const res = await axios.get( 'api/current_water_temp' )
-              const data = res.data                 
-              resolve(data)
-          } catch(err) {
-              reject(err)
-          }
-      })        
-    }  
-    static getWaterTemp(period) {
-        // var periods = 'api/power/2020-01-14T14:23:30+01:00_2020-01-14T14:23:50+01:00'
+    }    
+    
+    static getPeriod(period, type) {
         return new Promise(async (resolve, reject) => {           
             try{
-                const res = await axios.get( 'api/water_temp/'.concat(period) )
+                const res = await axios.get( `api/period/${period}/${type}` )
                 const data = res.data
                 resolve(data)
             } catch(err) {
                 reject(err)
             }
         })
-    }        
+
+    }
 }
 
 export default APIService

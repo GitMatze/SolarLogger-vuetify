@@ -155,7 +155,7 @@
             try {
                 this.errs.getData.show = false
                 this.loaded = false
-                var rawData = await APIService.getPower(this.period)
+                var rawData = await APIService.getPeriod(this.period, 'power')
                 if (rawData[1]==undefined) {
                   this.errs.getData.msg= 'Keine Daten empfangen.'
                   this.errs.getData.show = true

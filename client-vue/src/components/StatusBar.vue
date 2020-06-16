@@ -154,7 +154,7 @@
     methods: {
         async updateCurrentVals() {
           try {
-            var rawData = await APIService.getCurrentVals()
+            var rawData = await APIService.getCurrent('electricity')
             this.result = rawData
             if (rawData[0].power.pv == null){
               this.errs.updateCurrentVals.msg = 'Der Sensor scheint aktuell keine Daten zu liefern.'

@@ -87,7 +87,7 @@
     methods: {
         async updateCurrentVals() {
           try {
-            var rawData = await APIService.getCurrentWaterTemp()
+            var rawData = await APIService.getCurrent('water_temp')
             this.result = rawData
             if (rawData[0].water_temp == null){
               this.errs.updateCurrentVals.msg = 'Der Sensor scheint aktuell keine Daten zu liefern.'

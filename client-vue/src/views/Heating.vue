@@ -142,15 +142,15 @@
             try {
                 this.errs.getData.show = false
                 this.loaded = false
-                var rawData = await APIService.getWaterTemp(this.period)
+                var rawData = await APIService.getPeriod(this.period, 'water_temp')
                 if (rawData[1]==undefined) {
                   this.errs.getData.msg= 'Keine Daten empfangen.'
                   this.errs.getData.show = true
                   return
                 }         
                 var temp = rawData.map(entry => 
-                   ({x: entry.time, y: entry.temp}))                  
-
+                   ({x: entry.time, y: entry.data}))
+                   
                  this.chartData = {                     
                      datasets: [                     
                          {label: 'Temperatur',
