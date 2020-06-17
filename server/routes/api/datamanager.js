@@ -241,9 +241,9 @@ function insertWatertemp() {
     if (update_status['water_temp']) {
         var time = update_time['water_temp']
         db.run( 
-        'INSERT INTO water_temp (temp, time) VALUES ($temp, datetime($time))',
+        'INSERT INTO water_temp (data, time) VALUES ($data, datetime($time))',
         {
-            $temp: current['water_temp'],
+            $data: current['water_temp'],
             $time: time
         },
         (err) => {
