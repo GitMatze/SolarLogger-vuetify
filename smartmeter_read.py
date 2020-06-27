@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from serial import Serial
 from serial import SerialException
@@ -103,7 +105,7 @@ def read_grid_meter(ser):
     grid_json["energy_out"] = grid_energy_out_mwh
     grid_json["power"] = grid_power_w
     try:
-        response = requests.post(grid_api, headers=headers, data=json.dumps(grid_json), timeout=post_t           imeout)
+        response = requests.post(grid_api, headers=headers, data=json.dumps(grid_json), timeout=post_timeout)
     except requests.exceptions.RequestException as e:  # This is the correct syntax
         pass # failed to connect
     if debug_output:
@@ -130,7 +132,7 @@ def read_pv_meter(ser):
     pv_json["energy"] = pv_energy
     pv_json["power"] = pv_power
     try:
-        response = requests.post(pv_api, headers=headers, data=json.dumps(pv_json), timeout=post_timeo           ut)
+        response = requests.post(pv_api, headers=headers, data=json.dumps(pv_json), timeout=post_timeout)
     except requests.exceptions.RequestException as e:  # This is the correct syntax
         pass # failed to connect
     if debug_output:
