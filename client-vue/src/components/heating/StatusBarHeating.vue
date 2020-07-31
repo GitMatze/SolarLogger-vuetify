@@ -33,7 +33,11 @@
               <v-list-item>
                   <v-list-item-title>Aktuelle Regelung</v-list-item-title>                        
                   <v-list-item-title>Heizstab {{current_control}}</v-list-item-title>
-              </v-list-item>              
+              </v-list-item>
+              <v-list-item>
+                  <v-list-item-title>Aktuelle Zieltemperatur</v-list-item-title>                        
+                  <v-list-item-title>{{target_temp}} &deg;C</v-list-item-title>
+              </v-list-item>               
             </v-list>              
         </v-card-text>  
         </v-card>
@@ -52,7 +56,11 @@
             <tr>
                 <td>Aktuelle Regelung</td>
                 <td>Heizstab {{current_control}} </td>
-            </tr>                 
+            </tr>            
+            <tr>
+                <td>Aktuelle Zieltemperatur</td>
+                <td>{{target_temp}} &deg;C</td>
+            </tr>        
             </tbody>
         </template>
         </v-simple-table>
@@ -73,6 +81,7 @@
       return {
           current_temp: '_ _', 
           current_control: '_ _',
+          target_temp: '_ _',
           last_update_time: '_ _ : _ _',          
           errs: {
             updateCurrentVals: {show: false, msg:''},
@@ -87,7 +96,7 @@
     methods: {
         async updateCurrentVals() {
           try {
-            var rawData = await APIService.getCurrent('water_temp')
+            var rawData = await APIService.getCurrent('water')
             this.result = rawData
             if (rawData[0].water_temp == null){
               this.errs.updateCurrentVals.msg = 'Der Sensor scheint aktuell keine Daten zu liefern.'
@@ -100,6 +109,7 @@
             else {
               this.current_temp = rawData[0].water_temp
               this.current_control = rawData[0].is_heating ? "an" : "aus"
+              this.target_temp = rawData[0].target_temp
               this.last_update_time = moment(rawData[0].time).format('dddd HH:mm:ss')
               this.errs.updateCurrentVals.show = false              
             }
