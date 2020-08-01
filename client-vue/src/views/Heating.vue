@@ -106,8 +106,9 @@
           log :'',
           date: moment().format().substr(0, 10),
           menu1: false,
-          starttime: moment().startOf('day').format('HH:mm'),
+          starttime: '-18',// moment().startOf('day').format('HH:mm'),
           endtime: 'jetzt',
+          period: '',
           result:''                    
       }
     },
@@ -115,11 +116,7 @@
     computed: {
       computedDateFormattedMomentjs () {
         return this.date ? moment(this.date).format('ll') : ''
-      },
-      period () {
-        return ''.concat(moment( `${this.date}T${this.starttime}` ).format(),'_',
-                         moment( `${this.date}T${this.endtime}` ).format())
-      }      
+      } 
     },
     async created() {
         this.getData()
@@ -168,25 +165,35 @@
                 
             }
         },
-        // checks if input day time is valid 
+        // checks if input day time is valid
+        // preceding '-' decreases starttime by one day 
         checkPeriodFormat() { 
           this.errs.checkPeriodFormat.show = false 
           if (this.endtime.toLowerCase() == 'jetzt') {
             this.endtime = moment().format('HH:mm')
-          }        
+          }
+          var prev_day = 0 
+          if (this.starttime[0]=="-") {
+            prev_day = 1
+          }
+
           this.starttime = moment(this.starttime,'HH:mm').format('HH:mm')
           this.endtime = moment(this.endtime,'HH:mm').format('HH:mm')            
           
           if (this.starttime == 'Invalid date' || this.endtime == 'Invalid date') {
             return false
-          }
+          }          
           // TODO was ist mit 24 Uhr? 
-          else if ( moment(this.endtime, 'HH:mm').diff( moment(this.starttime, 'HH:mm') ) <0 ){ 
+          else if ( !prev_day && moment(this.endtime, 'HH:mm').diff( moment(this.starttime, 'HH:mm') ) <0 ){ 
             this.errs.checkPeriodFormat.msg = 'Die Anfangszeit darf nicht größer als die Endzeit sein.'
             this.errs.checkPeriodFormat.show = true
             return false
-          }
+          }          
           else {
+            var start_date =  moment(this.date).subtract(prev_day, 'days').format().substr(0,10)
+            this.period = ''.concat(moment( `${start_date}T${this.starttime}` ).format(),'_',
+                         moment( `${this.date}T${this.endtime}` ).format())
+            this.starttime = prev_day ? '-'+this.starttime : this.starttime
             return true
           }                 
         }   
