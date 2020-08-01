@@ -29,8 +29,10 @@ router.get('/water_control/:data', (req, res) => {
   
   let grid = dm.getCurrent('grid_power')
   let target_temp = em.getTargetTemp()
-  let is_heating = req_power+grid<0 && temp<target_temp
-  console.log(target_temp)
+  let is_heating = dm.getCurrent('is_heating')
+  let excess = is_heating ? grid<0 : req_power+grid<0
+  is_heating = excess && temp<target_temp
+  console.log(target_temp) 
 
   dm.update('water_temp',temp)
   dm.update('is_heating', is_heating)
