@@ -16,7 +16,7 @@ module.exports.getTargetTemp = function() {
         return min_temp
     } 
     else {
-        var endtime = config.endtime.month[moment().month()]
+        var endtime = config.endtime.month[moment().format("M")]
         if (hour>endtime) {
             return max_temp
         }
