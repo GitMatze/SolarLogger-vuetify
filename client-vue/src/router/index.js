@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Electricity from '../views/Electricity.vue'
 import Statistics from '../views/Statistics.vue'
 import More from '../views/More.vue'
 import Heating from '../views/Heating.vue'
@@ -10,8 +10,8 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home
+    name: 'electricity',
+    component: Electricity
   },
   {
     path: '/statistics',

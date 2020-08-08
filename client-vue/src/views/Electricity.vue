@@ -209,7 +209,7 @@
         // checks if input day time is valid 
         checkPeriodFormat() { 
           this.errs.checkPeriodFormat.show = false 
-          if (this.endtime.toLowerCase() == 'jetzt') {
+          if (this.endtime.toLowerCase().startsWith('j')) {
             this.endtime = moment().format('HH:mm')
           }        
           this.starttime = moment(this.starttime,'HH:mm').format('HH:mm')

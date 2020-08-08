@@ -65,7 +65,7 @@ export default {
         return {
             // drawer: false,
             links: [
-                {text: 'Übersicht', route: '/'},
+                {text: 'Strom', route: '/'},
                 {text: 'Statistiken', route: '/statistics'},
                 {text: 'Heizung', route: '/heating'},
                 {text: 'Weiteres', route: '/more'},                

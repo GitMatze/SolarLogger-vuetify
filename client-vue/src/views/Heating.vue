@@ -169,7 +169,7 @@
         // preceding '-' decreases starttime by one day 
         checkPeriodFormat() { 
           this.errs.checkPeriodFormat.show = false 
-          if (this.endtime.toLowerCase() == 'jetzt') {
+          if (this.endtime.toLowerCase().startsWith('j')) { // means jetzt
             this.endtime = moment().format('HH:mm')
           }
           var prev_day = 0 
