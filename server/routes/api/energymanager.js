@@ -26,3 +26,33 @@ module.exports.getTargetTemp = function() {
     }                
 }
 
+module.exports.controlWater = function(temp, grid, update_time, is_heating) {    
+    var threshold = 1200 // critical excess power to switch heating on
+    var target_temp = this.getTargetTemp()
+    var suf_power = is_heating ? grid<0 : threshold+grid<0
+    var t_diff = moment().diff(moment(update_time), 'seconds') // time since grid was last updated
+    if (t_diff >30) {
+        console.log('Grid power is not updated, turn heating of')
+    }    
+    var is_heating_new =  suf_power && temp<target_temp && t_diff<30
+    
+    return {
+        target_temp: target_temp,
+        threshold: threshold,
+        is_heating: is_heating_new
+    }
+}
+
+module.exports.getCurrentConfig = function() {
+   current_month = moment().format("M")
+    return {
+        month: current_month, 
+        min_temp: min_temp,
+        max_temp: max_temp,
+        starttime: starttime,
+        endtime: config.endtime.month[current_month]
+    }
+}
+
+
+

@@ -7,7 +7,7 @@ const db = new sqlite3.Database('db.db');
 const names = [
     'pv_power', 'grid_power', 
     'pv_energy', 'grid_in_energy', 'grid_out_energy',    
-    'water_temp', 'is_heating', 'target_temp'
+    'water_temp', 'is_heating', 'target_temp', 'threshold'
  ]
 
 current = {}

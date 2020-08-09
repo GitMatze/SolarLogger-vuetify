@@ -19,26 +19,30 @@ router.get('/MinMaxTime/:type', async (req, res) => {
 })
 
 // api for heating control of water storage
-// THIS ACTS AS THE POST METHOD AS WELL
+// also used for posting temp data
 router.get('/water_control/:data', (req, res) => {
   try {
   const data = req.params.data.split('_')
   const temp = parseInt(data[0])  // current water temperature
-  const req_power = parseInt(data[1]) // requested power
+  // const req_power = parseInt(data[1]) // requested power
   console.log(data)
   
   let grid = dm.getCurrent('grid_power')
-  let target_temp = em.getTargetTemp()
   let is_heating = dm.getCurrent('is_heating')
-  let excess = is_heating ? grid<0 : req_power+grid<0
-  is_heating = excess && temp<target_temp
-  console.log(target_temp) 
+  let update_time = dm.getTime('grid_power')
+  let state = em.controlWater(temp, grid, update_time,  is_heating)
+  
+
+  console.log(state) 
 
   dm.update('water_temp',temp)
-  dm.update('is_heating', is_heating)
-  dm.update('target_temp', target_temp)
+  dm.update('is_heating', state['is_heating'])
+  dm.update('target_temp', state['target_temp'])
+  dm.update('threshold', state['threshold'])
 
-  res.send([ {heat_on: is_heating ? "y": "n", grid: grid} ])    
+  res.send([ {heat_on: state['is_heating'] ? "y": "n", 
+              grid: grid
+            }])    
   }
   catch (err) {
     console.log("GET heat error")
@@ -83,8 +87,16 @@ router.get('/current/:type', (req, res) => {
           water_temp: dm.getCurrent('water_temp'),
           is_heating: dm.getCurrent('is_heating'),
           target_temp: dm.getCurrent('target_temp'),
+          threshold: dm.getCurrent('threshold'),
           time: dm.getTime('water_temp')
         }] ) 
+        break
+
+        case 'water_config':
+          console.log(em.getCurrentConfig())
+          res.send(
+            em.getCurrentConfig()
+          )
   }
   
 })
