@@ -60,7 +60,7 @@
                 <v-list-item-title>
                   Sofort auf {{config.force_heating_temp}}&deg;C heizen
                 </v-list-item-title>
-                <v-list-item-title>
+                <v-list-item>
                   <v-switch 
                   :loading="switch_loading" 
                   :disabled="switch_disabled"
@@ -68,13 +68,15 @@
                   v-model="force_heating" 
                   v-on:change="postForceHeating">          
                   </v-switch>
-                </v-list-item-title>
+                </v-list-item>
               </v-list-item>
             </v-list>
           </v-col>
           <v-col>
-             <!-- Info Dialog Box  -->
-            <div class="text-right">
+            <v-list>
+              <v-list-item>
+                 <!-- Info Dialog Box  -->
+            <div>
               <v-dialog
               v-model="dialog"
               width="510"
@@ -105,13 +107,17 @@
                       Bis morgens um {{ this.formatHour(this.config.starttime+1) }} Uhr beträgt sie {{this.config.min_temp}}&deg;C und steigt dann bis {{ this.formatHour(this.config.endtime) }} Uhr auf 
                       {{this.config.max_temp}}&deg;C an. <br>
                       Die Schaltschwelle, ab der der Heizstab eingeschaltet wird, liegt bei 1200W Überschussleistung. 
-                      Liegt die Wassertemperatur nach {{ this.formatHour(this.config.endtime) }} Uhr unter {{this.config.max_temp-this.config.lowerThreshold.tempDiff}}&deg;C, 
+                      Ist die Wassertemperatur nach {{ this.formatHour(this.config.endtime) }} Uhr niedriger als {{this.config.max_temp-this.config.lowerThreshold.tempDiff}}&deg;C, 
                       wird die Schaltschwelle auf {{this.config.lowerThreshold.threshold}}W reduziert.  
                     </v-card-text>
                   </div>        
                 </v-card>
               </v-dialog>
             </div>            
+
+              </v-list-item>
+            </v-list>
+            
           </v-col>
           </v-row>
             
