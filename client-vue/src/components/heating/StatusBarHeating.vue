@@ -143,9 +143,21 @@
                 <td>{{target_temp}} &deg;C</td>
             </tr>
             <tr>
-                <td>Aktuelle Schaltschwell</td>
+                <td>Aktuelle Schaltschwelle</td>
                 <td>{{threshold}} W</td>
-            </tr>                    
+            </tr>
+            <tr>
+                <td>Auf {{config.force_heating_temp}}&deg;C heizen</td>
+                <td>
+                  <v-switch 
+                  :loading="switch_loading" 
+                  :disabled="switch_disabled"
+                  value 
+                  v-model="force_heating" 
+                  v-on:change="postForceHeating">          
+                  </v-switch>
+                </td>
+            </tr>                        
             </tbody>
         </template>
         </v-simple-table>
