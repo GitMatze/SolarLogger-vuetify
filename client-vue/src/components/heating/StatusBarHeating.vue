@@ -36,7 +36,7 @@
                 <v-list-item>
                     <v-list-item-title>Aktuelle Zieltemperatur</v-list-item-title>                        
                     <v-list-item-title>{{target_temp}} &deg;C</v-list-item-title>
-                </v-list-item>                
+                </v-list-item>                             
               </v-list>
             </v-col>
             <v-col class="display-1" cols="6">
@@ -53,45 +53,72 @@
             </v-col>
           </v-row>
 
-          <!-- Info Dialog Box  -->
-          <div class="text-right">
-            <v-dialog
-            v-model="dialog"
-            width="510"
-            >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                color="grey lighten"
-                dark
-                v-bind="attrs"
-                v-on="on"
+          <v-row align="center">
+            <v-col class="display-1" cols="6">
+            <v-list>
+              <v-list-item>
+                <v-list-item-title>
+                  Sofort auf {{config.force_heating_temp}}&deg;C heizen
+                </v-list-item-title>
+                <v-list-item-title>
+                  <v-switch 
+                  :loading="switch_loading" 
+                  :disabled="switch_disabled"
+                  value 
+                  v-model="force_heating" 
+                  v-on:change="postForceHeating">          
+                  </v-switch>
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-col>
+          <v-col>
+             <!-- Info Dialog Box  -->
+            <div class="text-right">
+              <v-dialog
+              v-model="dialog"
+              width="510"
               >
-                Parameter 
-              </v-btn>
-            </template>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="grey lighten"
+                  dark
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  Parameter 
+                </v-btn>
+              </template>
 
-            <v-card>
-              <div v-if= "this.config==0">
-                <v-banner>
-                  <h1 class="body-2 error--text">Keine Einstellungen für die aktuelle Regelung empfangen.</h1>                    
-                </v-banner>
-              </div>
-              <div v-else>
-                <v-card-title>
-                  Regelparameter im Monat {{this.formatMonth(this.config.month)}}
-                </v-card-title>
-                <v-card-text>
-                Die Zieltemperatur wird über den Tag linear erhöht.
-                Bis morgens um {{ this.formatHour(this.config.starttime+1) }} Uhr beträgt sie {{this.config.min_temp}}&deg;C und steigt dann bis {{ this.formatHour(this.config.endtime) }} Uhr auf 
-                {{this.config.max_temp}}&deg;C an. <br>
-                Die Schaltschwelle, ab der der Heizstab eingeschaltet wird, liegt bei 1200W Überschussleistung. 
-                Liegt die Wassertemperatur nach {{ this.formatHour(this.config.endtime) }} Uhr unter {{this.config.max_temp-this.config.lowerThreshold.tempDiff}}&deg;C, 
-                wird die Schaltschwelle auf {{this.config.lowerThreshold.threshold}}W reduziert.  
-                </v-card-text>
-              </div>        
-            </v-card>
-          </v-dialog>
-        </div>
+              <v-card>
+                <div v-if= "this.config==0">
+                  <v-banner>
+                    <h1 class="body-2 error--text">Keine Einstellungen für die aktuelle Regelung empfangen.</h1>                    
+                  </v-banner>
+                </div>
+                <div v-else>
+                  <v-card-title>
+                    Regelparameter im Monat {{this.formatMonth(this.config.month)}}
+                  </v-card-title>
+                    <v-card-text>
+                      Die Zieltemperatur wird über den Tag linear erhöht.
+                      Bis morgens um {{ this.formatHour(this.config.starttime+1) }} Uhr beträgt sie {{this.config.min_temp}}&deg;C und steigt dann bis {{ this.formatHour(this.config.endtime) }} Uhr auf 
+                      {{this.config.max_temp}}&deg;C an. <br>
+                      Die Schaltschwelle, ab der der Heizstab eingeschaltet wird, liegt bei 1200W Überschussleistung. 
+                      Liegt die Wassertemperatur nach {{ this.formatHour(this.config.endtime) }} Uhr unter {{this.config.max_temp-this.config.lowerThreshold.tempDiff}}&deg;C, 
+                      wird die Schaltschwelle auf {{this.config.lowerThreshold.threshold}}W reduziert.  
+                    </v-card-text>
+                  </div>        
+                </v-card>
+              </v-dialog>
+            </div>            
+          </v-col>
+          </v-row>
+            
+          
+          
+              
+         
         </v-card-text>      
         </v-card>
         
@@ -141,22 +168,29 @@
           current_control: '_ _',
           target_temp: '_ _',
           threshold: '_ _',
+          force_heating: false, 
           last_update_time: '_ _ : _ _',
           config: '',
-          dialog: false,          
+          dialog: false,    
+          switch_loading: false,      
           errs: {
             updateCurrentVals: {show: false, msg:''},
           },
       }     
     }, 
-    computed: {},
+    computed: {
+      switch_disabled () {
+        var tempDiff = this.current_temp-this.config.force_heating_temp
+        return tempDiff>=0
+      },
+    },
     async created() {
         this.updateCurrentVals() //first update immediately  
-        this.updateConfig()     
-        setInterval(this.updateCurrentVals, 30*1000);            
+        this.getConfig()     
+        setInterval(this.updateCurrentVals, 3*1000);            
     }, 
     methods: {
-        async updateConfig() {
+        async getConfig() {
           try {
             var config = await APIService.getCurrent('water_config')
             /* eslint-disable no-console */
@@ -187,13 +221,25 @@
               this.current_control = rawData[0].is_heating ? "an" : "aus"
               this.target_temp = rawData[0].target_temp
               this.threshold = rawData[0].threshold
+              this.force_heating = rawData[0].force_heating
               this.last_update_time = moment(rawData[0].time).format('dddd HH:mm:ss')
-              this.errs.updateCurrentVals.show = false              
+              this.errs.updateCurrentVals.show = false  
+              this.switch_loading = false            
             }
           }          
           catch (err) {
             this.errs.updateCurrentVals.msg = `Fehler beim Updaten der Momentanwerte: ${err.message}`
             this.errs.updateCurrentVals.show = true
+          }
+        },
+        async postForceHeating() {
+          try {        
+              this.switch_loading = true;
+              await APIService.post('force_heating', {value: this.force_heating} )
+              this.switch_loading = false                  
+          }          
+          catch (err) {
+            // Todo: Error
           }
         },
         formatMonth(month) {

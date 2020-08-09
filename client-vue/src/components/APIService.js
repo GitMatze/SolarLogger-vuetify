@@ -58,6 +58,18 @@ class APIService {
         })
 
     }
+
+    static post(type, json) {
+        return new Promise(async (resolve, reject) => {           
+            try{
+                const res = await axios.post( `api/${type}`, json)
+                resolve(res.status)
+            } catch(err) {
+                reject(err)
+            }
+        })
+
+    }
 }
 
 export default APIService

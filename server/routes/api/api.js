@@ -27,10 +27,7 @@ router.get('/water_control/:data', (req, res) => {
   // const req_power = parseInt(data[1]) // requested power
   console.log(data)
   
-  let grid = dm.getCurrent('grid_power')
-  let is_heating = dm.getCurrent('is_heating')
-  let update_time = dm.getTime('grid_power')
-  let state = em.controlWater(temp, grid, update_time,  is_heating)
+  let state = em.controlWater(temp)
   console.log(state) 
   dm.update('water_temp',temp)
   dm.update('is_heating', state['is_heating'])
@@ -38,7 +35,7 @@ router.get('/water_control/:data', (req, res) => {
   dm.update('threshold', state['threshold'])
 
   res.send([ {heat_on: state['is_heating'] ? "y": "n", 
-              grid: grid
+              grid: dm.getCurrent('grid_power')
             }])    
   }
   catch (err) {
@@ -58,6 +55,12 @@ router.post('/grid', async (req, res) => {
   dm.update('grid_power',req.body.power)
   dm.update('grid_in_energy',req.body.energy_in)
   dm.update('grid_out_energy',req.body.energy_out)
+  res.status(201).send();
+});
+
+router.post('/:type', async (req, res) => { 
+  dm.update(req.params.type, req.body.value)  
+  console.log(req.body.value)
   res.status(201).send();
 });
 
@@ -85,6 +88,7 @@ router.get('/current/:type', (req, res) => {
           is_heating: dm.getCurrent('is_heating'),
           target_temp: dm.getCurrent('target_temp'),
           threshold: dm.getCurrent('threshold'),
+          force_heating: dm.getCurrent('force_heating'),
           time: dm.getTime('water_temp')
         }] ) 
         break

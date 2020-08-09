@@ -22,6 +22,6 @@
     "lowerThreshold": {
         "tempDiff": 5,
         "threshold": 900
-    }
-
+    },
+    "force_heating_temp": 39
 }

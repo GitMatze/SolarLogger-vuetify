@@ -1,5 +1,7 @@
 const moment = require('moment');
 config = require("./config.json") 
+const dm = require('./datamanager')
+
 
 var min_temp = config.min_temp
 var max_temp = config.max_temp
@@ -40,18 +42,32 @@ getThreshold = function(hour, endtime, temp, target_temp) {
     }   
 }
 
-module.exports.controlWater = function(temp, grid, update_time, is_heating) {    
+module.exports.controlWater = function(temp) {    
+    
+    var grid = dm.getCurrent('grid_power')
+    var is_heating = dm.getCurrent('is_heating')
+    var update_time = dm.getTime('grid_power')
+
     var hour = moment().hour()
     var endtime = config.endtime.month[moment().format("M")]
     var target_temp = getTargetTemp(hour, endtime)
     var threshold = getThreshold(hour, endtime, temp, target_temp) // critical excess power to switch heating on
+
     var excess = is_heating ? -grid+1200 : -grid 
     var suf_power = excess > threshold
     var t_diff = moment().diff(moment(update_time), 'seconds') // time since grid was last updated
     if (t_diff >30) {
-        console.log('Grid power is not updated, turn heating of')
-    }    
-    var is_heating_new =  suf_power && temp<target_temp && t_diff<30
+        console.log('Grid power is not being updated, turn heat off')
+    }
+    
+    // 
+    var force_heating = dm.getCurrent('force_heating')
+    if (force_heating && temp >= config.force_heating_temp) {
+        dm.update('force_heating', false)
+        force_heating = false
+    }
+
+    var is_heating_new =  force_heating || suf_power && temp<target_temp && t_diff<30
     
     return {
         target_temp: target_temp,
@@ -68,7 +84,8 @@ module.exports.getCurrentConfig = function() {
         max_temp: max_temp,
         starttime: starttime,
         endtime: config.endtime.month[current_month],
-        lowerThreshold: config.lowerThreshold
+        lowerThreshold: config.lowerThreshold,
+        force_heating_temp: config.force_heating_temp        
     }
 }
 
