@@ -31,10 +31,7 @@ router.get('/water_control/:data', (req, res) => {
   let is_heating = dm.getCurrent('is_heating')
   let update_time = dm.getTime('grid_power')
   let state = em.controlWater(temp, grid, update_time,  is_heating)
-  
-
   console.log(state) 
-
   dm.update('water_temp',temp)
   dm.update('is_heating', state['is_heating'])
   dm.update('target_temp', state['target_temp'])

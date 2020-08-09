@@ -66,7 +66,7 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                Details
+                Parameter 
               </v-btn>
             </template>
 
@@ -82,9 +82,11 @@
                 </v-card-title>
                 <v-card-text>
                 Die Zieltemperatur wird über den Tag linear erhöht.
-                Bis morgens um {{ this.formatHour(this.config.starttime+1) }} Uhr beträgt sie {{this.config.min_temp}} &deg;C und steigt dann bis {{ this.formatHour(this.config.endtime) }} Uhr auf 
-                {{this.config.max_temp}} &deg;C an. 
-                Die Schaltschwelle, ab der der Heizstab eingeschaltet wird, liegt bei 1200 W Überschussleistung und wird nicht reguliert. 
+                Bis morgens um {{ this.formatHour(this.config.starttime+1) }} Uhr beträgt sie {{this.config.min_temp}}&deg;C und steigt dann bis {{ this.formatHour(this.config.endtime) }} Uhr auf 
+                {{this.config.max_temp}}&deg;C an. <br>
+                Die Schaltschwelle, ab der der Heizstab eingeschaltet wird, liegt bei 1200W Überschussleistung. 
+                Liegt die Wassertemperatur nach {{ this.formatHour(this.config.endtime) }} Uhr unter {{this.config.max_temp-this.config.lowerThreshold.tempDiff}}&deg;C, 
+                wird die Schaltschwelle auf {{this.config.lowerThreshold.threshold}}W reduziert.  
                 </v-card-text>
               </div>        
             </v-card>

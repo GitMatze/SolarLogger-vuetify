@@ -5,19 +5,18 @@ var min_temp = config.min_temp
 var max_temp = config.max_temp
 var starttime = config.starttime
 
+
 // console.log(config.endtime.month[moment().month()])
 
 
 // linearly increase target temp from min_temp at starttime to max_temp at endtime
-module.exports.getTargetTemp = function() {
-    var hour = moment().hour()
+getTargetTemp = function(hour, endtime) {
 
     if (hour<starttime) {
         return min_temp
     } 
     else {
-        var endtime = config.endtime.month[moment().format("M")]
-        if (hour>endtime) {
+        if (hour>endtime) { 
             return max_temp
         }
         else {            
@@ -26,10 +25,28 @@ module.exports.getTargetTemp = function() {
     }                
 }
 
+getThreshold = function(hour, endtime, temp, target_temp) {
+    timeDiff = endtime-hour
+    tempDiff = target_temp-temp
+    console.log(`timeDiff: ${timeDiff}`)
+    console.log(`tempDiff: ${tempDiff}`)
+
+    // if endtime has passed but temp is significantly lower than target temp, reduce threshold
+    if (timeDiff<=0 && tempDiff > config.lowerThreshold.tempDiff) {
+        return config.lowerThreshold.threshold      
+    }
+    else {
+       return config.threshold
+    }   
+}
+
 module.exports.controlWater = function(temp, grid, update_time, is_heating) {    
-    var threshold = 1200 // critical excess power to switch heating on
-    var target_temp = this.getTargetTemp()
-    var suf_power = is_heating ? grid<0 : threshold+grid<0
+    var hour = moment().hour()
+    var endtime = config.endtime.month[moment().format("M")]
+    var target_temp = getTargetTemp(hour, endtime)
+    var threshold = getThreshold(hour, endtime, temp, target_temp) // critical excess power to switch heating on
+    var excess = is_heating ? -grid+1200 : -grid 
+    var suf_power = excess > threshold
     var t_diff = moment().diff(moment(update_time), 'seconds') // time since grid was last updated
     if (t_diff >30) {
         console.log('Grid power is not updated, turn heating of')
@@ -50,9 +67,8 @@ module.exports.getCurrentConfig = function() {
         min_temp: min_temp,
         max_temp: max_temp,
         starttime: starttime,
-        endtime: config.endtime.month[current_month]
+        endtime: config.endtime.month[current_month],
+        lowerThreshold: config.lowerThreshold
     }
 }
-
-
 
