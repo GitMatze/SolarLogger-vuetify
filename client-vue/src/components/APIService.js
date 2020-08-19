@@ -56,7 +56,6 @@ class APIService {
                 reject(err)
             }
         })
-
     }
 
     static post(type, json) {
@@ -68,7 +67,6 @@ class APIService {
                 reject(err)
             }
         })
-
     }
 }
 

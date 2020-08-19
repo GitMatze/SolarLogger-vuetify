@@ -187,7 +187,7 @@
     async created() {
         this.updateCurrentVals() //first update immediately  
         this.getConfig()     
-        setInterval(this.updateCurrentVals, 3*1000);            
+        setInterval(this.updateCurrentVals, 15*1000);            
     }, 
     methods: {
         async getConfig() {
