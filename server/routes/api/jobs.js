@@ -7,7 +7,7 @@ const dm = require('./datamanager')
 var CronJob = require('cron').CronJob;
 
 
-url = "http://esp8266:80"
+url = "http://192.168.178.36:80"
 
 // gets temperature
 const getTemp = function() {
@@ -67,8 +67,6 @@ var heatjob = new CronJob('*/20 * * * * *',  function() {
   }, null, true);
 
 
-if (url = "http://esp8266:80") {
-    console.warn(`CAUTION: YOU ARE SENDING COMMANDS TO ${url}`)  
-}
+console.warn(`CAUTION: YOU ARE SENDING COMMANDS TO ${url}`)
   
 heatjob.start()
