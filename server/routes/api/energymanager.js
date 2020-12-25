@@ -6,6 +6,7 @@ const dm = require('./datamanager')
 var min_temp = config.min_temp
 var max_temp = config.max_temp
 var starttime = config.starttime
+var wattage = config.wattage
 
 
 // console.log(config.endtime.month[moment().month()])
@@ -55,9 +56,10 @@ module.exports.controlWater = function(temp) {
     var hour = moment().hour()
     var endtime = config.endtime.month[moment().format("M")]
     var target_temp = getTargetTemp(hour, endtime)
-    var threshold = getThreshold(hour, endtime, temp, target_temp, is_heating) // critical excess power to switch heating on
+    // critical excess power to switch heating on
+    var threshold = getThreshold(hour, endtime, temp, target_temp, is_heating) 
 
-    var excess = is_heating ? -grid+1200 : -grid 
+    var excess = is_heating ? -grid+wattage : -grid 
     var suf_power = excess > threshold
     var t_diff = moment().diff(moment(update_time), 'seconds') // time since grid was last updated
     if (t_diff >30) {

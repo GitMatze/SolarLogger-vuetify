@@ -24,5 +24,6 @@
         "threshold": 1200
     },
     "force_heating_temp": 39,
-    "hysteresis": 100
+    "hysteresis": 100,
+    "wattage": 1500
 }
