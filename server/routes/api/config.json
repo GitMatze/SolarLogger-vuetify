@@ -18,10 +18,11 @@
     "starttime": 9,
     "min_temp": 39,
     "max_temp": 55,
-    "threshold": 1200,
+    "threshold": 1500,
     "lowerThreshold": {
         "tempDiff": 5,
-        "threshold": 900
+        "threshold": 1200
     },
-    "force_heating_temp": 39
+    "force_heating_temp": 39,
+    "hysteresis": 100
 }
