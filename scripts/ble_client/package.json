@@ -1,0 +1,17 @@
+{
+  "name": "BluetoothNode10",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2-10",
+    "axios": "^0.21.1",
+    "pm2": "^4.5.1"
+  }
+}
