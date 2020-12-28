@@ -1,0 +1,6 @@
+For Raspberry 3 make the following modifcations:
+
+- install package node-red-contrib-noble-bluetooth
+- ble_client.js: change require('@abandonware/noble') to require('noble')
+- run with node v8.11.1
+  
