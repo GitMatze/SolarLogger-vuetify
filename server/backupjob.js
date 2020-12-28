@@ -25,7 +25,7 @@ c_m.on('ready', function() {
     c_m.end();
   });
   }
-  catch {
+  catch (err) {
     console.log(`Monthly Client Error: ${err.message}`)
 }
 });

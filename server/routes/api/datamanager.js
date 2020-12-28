@@ -180,7 +180,7 @@ module.exports.getEnergyStats= async function(type, start, end) {
               }    
             })
         }
-        catch {
+        catch (err) {
             reject( [{}] )
         }
     })     
