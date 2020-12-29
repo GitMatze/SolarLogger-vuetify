@@ -61,7 +61,7 @@ router.post('/grid', async (req, res) => {
 
 router.post('/:type', async (req, res) => { 
   dm.update(req.params.type, req.body.value)  
-  console.log(req.body.value)
+  // console.log(req.body.value)
   res.status(201).send();
 });
 
