@@ -198,7 +198,7 @@
     }, 
     computed: {
       switch_disabled () {
-        var tempDiff = this.current_temp-this.config.force_heating_temp
+        var tempDiff = this.current_temp/100-this.config.force_heating_temp
         return tempDiff>=0
       },
     },
