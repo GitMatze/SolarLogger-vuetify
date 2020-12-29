@@ -31,7 +31,10 @@
               <v-list>
                 <v-list-item>
                     <v-list-item-title>Temperatur</v-list-item-title>                        
-                    <v-list-item-title>{{(current_temp/100).toFixed(2)}}  &deg;C</v-list-item-title>
+                    <v-list-item-title>
+                      {{ typeof current_temp === 'string' ? 
+                      current_temp: (current_temp/100).toFixed(2)}}  &deg;C
+                    </v-list-item-title>
                 </v-list-item>
                 <v-list-item>
                     <v-list-item-title>Aktuelle Zieltemperatur</v-list-item-title>                        
@@ -138,7 +141,10 @@
             <tbody>
             <tr>
                 <td>Temperatur</td>
-                <td>{{(current_temp/100).toFixed(2)}} &deg;C </td>
+                <td>
+                  {{ typeof current_temp === 'string' ? 
+                      current_temp: (current_temp/100).toFixed(2)}} &deg;C 
+                </td>
             </tr>
             <tr>
                 <td>Aktuelle Regelung</td>
@@ -205,7 +211,7 @@
     async created() {
         this.updateCurrentVals() //first update immediately  
         this.getConfig()     
-        setInterval(this.updateCurrentVals, 15*1000);            
+        setInterval(this.updateCurrentVals, 5*1000);            
     }, 
     methods: {
         async getConfig() {
