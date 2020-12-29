@@ -46,8 +46,8 @@ const getMinMax = function(table) {
                     reject(err)
                 }
                 else if (rows) {
-                    console.log('rows')
-                    console.log(rows)
+                    // console.log('rows')
+                    // console.log(rows)
                     resolve(rows)
                 } else {
                 reject(new Error(`Unexpected database result, table: ${table}`))
@@ -64,7 +64,7 @@ module.exports.update = function(name, value) {
     current[name]=value
     update_time[name]=moment().format()
     update_status[name]=true
-    console.log('update '+name+': '+value)    
+    // console.log('update '+name+': '+value)    
 }
 
 module.exports.getCurrent = function(name) {
@@ -79,7 +79,7 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
     
     if (name == 'power') {
         var t_min = await getMinMax('power')
-        console.log(`TMIN: ${t_min}`)
+        // console.log(`TMIN: ${t_min}`)
     }
     return new Promise(async (resolve, reject)=> {
         
@@ -92,7 +92,7 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
 
             switch (name) {
                 case 'power':
-                    console.log(`${start}, ${t_min[0].min}`)
+                    // console.log(`${start}, ${t_min[0].min}`)
                     const t_diff = timeDiff(start, t_min[0].min)                                        
                     // use energy database if start date is further back than start of power table
                     if ( t_diff > 0 ) {
@@ -107,7 +107,7 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
                         WHERE T1.time>datetime('${start_n}') AND T1.time<datetime('${end_n}') AND T1.id%${modu}=0
                         ORDER BY T1.id DESC`
                     } else {
-                        console.log('using power db')
+                        // console.log('using power db')
                         modu = getFilterConstant(start, end, intervals['power'], 250)
                         query = `SELECT pv,grid,datetime(time, "localtime") time 
                         FROM power 
@@ -119,7 +119,7 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
                 // every table with a single column 'data' can be accessed
                 default:
                     modu = getFilterConstant(start, end, intervals[name], 250)
-                    console.log(modu)
+                    // console.log(modu)
                     query = `SELECT data, datetime(time, "localtime") time 
                     FROM ${name} 
                     WHERE time>datetime('${start_n}') AND time<datetime('${end_n}') AND id%'${modu}'=0 
@@ -138,7 +138,7 @@ module.exports.getPeriod = async function(name, start, end) { //TODO implement p
                 else if (rows.length == 0) {
                     reject(new Error('Empty database return')) 
                 }else {                     
-                    console.log(`Sending ${rows.length} values of ${name}`)
+                    // console.log(`Sending ${rows.length} values of ${name}`)
                     resolve(rows)
                 }                
             })
@@ -171,7 +171,7 @@ module.exports.getEnergyStats= async function(type, start, end) {
                 reject([{}])
               }
               else if (rows.length > 0 ) { // TODO row = undefined not catched
-                console.log(`Number of data entries: ${rows.length}`)
+                // console.log(`Number of data entries: ${rows.length}`)
                 resolve(rows);        
               } 
               else { 
@@ -188,7 +188,7 @@ module.exports.getEnergyStats= async function(type, start, end) {
 
 function getFilterConstant(start, end, interval, output_num) {
     var tdiff = timeDiff(start, end)
-    console.log(`tdiff: ${tdiff}`)
+    // console.log(`tdiff: ${tdiff}`)
     var n = Math.ceil(tdiff/(interval/1000*output_num)) 
     return n
 }
@@ -208,7 +208,7 @@ if (update_status['grid_in_energy'] && update_status['pv_energy']) {
     (err) => {
         if(err) { console.log(`Error at insertEnergy(): ${err.message}`) }
         else { 
-            console.log(`Insert Energy, pv: ${current['pv_energy']}, grid_out: ${current['grid_out_energy']}`)
+            // console.log(`Insert Energy, pv: ${current['pv_energy']}, grid_out: ${current['grid_out_energy']}`)
             update_status['pv_energy'] = false
             update_status['grid_in_energy'] = false
         }
@@ -229,7 +229,7 @@ function insertPower() {  //TODO change
         (err) => {
             if(err) { console.log(`Error at insertPower(): ${err.message}`) }
             else { 
-                console.log(`Insert Power, pv: ${current['pv_power']}, grid: ${current['grid_power']}`)
+                // console.log(`Insert Power, pv: ${current['pv_power']}, grid: ${current['grid_power']}`)
                 update_status['pv_power'] = false
                 update_status['grid_power'] = false
             }
@@ -249,7 +249,7 @@ function insertWatertemp() {
         (err) => {
             if(err) { console.log(`Error at insertWatertemp(): ${err.message}`) }
             else { 
-                console.log(`Insert Watertemp, temp: ${current['water_temp']}`)
+                // console.log(`Insert Watertemp, temp: ${current['water_temp']}`)
                 update_status['water_temp'] = false
             }
         })

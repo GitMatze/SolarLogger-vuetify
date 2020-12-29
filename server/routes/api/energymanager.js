@@ -31,8 +31,8 @@ getTargetTemp = function(hour, endtime) {
 getThreshold = function(hour, endtime, temp, target_temp, is_heating) {
     timeDiff = endtime-hour
     tempDiff = target_temp-temp
-    console.log(`timeDiff: ${timeDiff}`)
-    console.log(`tempDiff: ${tempDiff}`)
+    // console.log(`timeDiff: ${timeDiff}`)
+    // console.log(`tempDiff: ${tempDiff}`)
 
     // if endtime has passed but temp is significantly lower than target temp, reduce threshold
     if (timeDiff<=0 && tempDiff > config.lowerThreshold.tempDiff) {

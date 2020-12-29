@@ -26,10 +26,10 @@ router.get('/water_control/:data', (req, res) => {
   const data = req.params.data.split('_')
   const temp = parseInt(data[0])  // current water temperature
   // const req_power = parseInt(data[1]) // requested power
-  console.log(data)
+  // console.log(data)
   
   let state = em.controlWater(temp/100)
-  console.log(state) 
+  // console.log(state) 
   dm.update('water_temp',temp)
   dm.update('is_heating', state['is_heating'])
   dm.update('target_temp', state['target_temp'])
@@ -95,7 +95,7 @@ router.get('/current/:type', (req, res) => {
         break
 
         case 'water_config':
-          console.log(em.getCurrentConfig())
+          // console.log(em.getCurrentConfig())
           res.send(
             em.getCurrentConfig()
           )
@@ -107,9 +107,9 @@ router.get('/current/:type', (req, res) => {
 router.get('/period/:period/:type', async (req, res) => {
   try {
     const periods = req.params.period.split('_');
-    console.log('') 
-    console.log(`Starttime: ${periods[0]}`)
-    console.log(`Endtime: ${periods[1]}`)
+    // console.log('') 
+    // console.log(`Starttime: ${periods[0]}`)
+    // console.log(`Endtime: ${periods[1]}`)
     type = req.params.type
 
     let data = await dm.getPeriod(type, periods[0], periods[1]) 
@@ -125,9 +125,9 @@ router.get('/energy/:data', async (req, res) => {
     const data = req.params.data.split('_')
     const type = data[0]
     const period = [ data[1], data[2] ]
-    console.log('')
-    console.log('GET REQUEST statistics')
-    console.log(data)
+    // console.log('')
+    // console.log('GET REQUEST statistics')
+    // console.log(data)
     const rows = await dm.getEnergyStats(type, period[0], period[1])
     res.send( rows) 
   } catch(err) {
@@ -135,8 +135,6 @@ router.get('/energy/:data', async (req, res) => {
   }
 
 })
-
-
 
 
   module.exports = router;
