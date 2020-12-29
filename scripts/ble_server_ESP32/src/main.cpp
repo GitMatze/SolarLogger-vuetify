@@ -107,8 +107,8 @@ void loop() {
     // Update temperature
     // (should ideally be done in the onRead callback)
     sensors.requestTemperatures();
-    int temp = sensors.getTempCByIndex(0);  
-    Serial.print("TEMP: ");
+    int temp = (sensors.getTempCByIndex(0)*100);  
+    Serial.print("TEMP in dC: ");
     Serial.print(sensors.getTempCByIndex(0));  
     Serial.println(" °C");    
     char tempBuf [10];

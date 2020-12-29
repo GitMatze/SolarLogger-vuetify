@@ -31,7 +31,7 @@
               <v-list>
                 <v-list-item>
                     <v-list-item-title>Temperatur</v-list-item-title>                        
-                    <v-list-item-title>{{current_temp}}  &deg;C</v-list-item-title>
+                    <v-list-item-title>{{(current_temp/100).toFixed(2)}}  &deg;C</v-list-item-title>
                 </v-list-item>
                 <v-list-item>
                     <v-list-item-title>Aktuelle Zieltemperatur</v-list-item-title>                        
@@ -138,7 +138,7 @@
             <tbody>
             <tr>
                 <td>Temperatur</td>
-                <td>{{current_temp}} &deg;C </td>
+                <td>{{(current_temp/100).toFixed(2)}} &deg;C </td>
             </tr>
             <tr>
                 <td>Aktuelle Regelung</td>

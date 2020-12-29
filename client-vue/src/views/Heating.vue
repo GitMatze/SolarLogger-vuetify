@@ -146,7 +146,7 @@
                   return
                 }         
                 var temp = rawData.map(entry => 
-                   ({x: entry.time, y: entry.data}))
+                   ({x: entry.time, y: entry.data/100}))
                    
                  this.chartData = {                     
                      datasets: [                     

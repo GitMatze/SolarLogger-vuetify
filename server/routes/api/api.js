@@ -28,7 +28,7 @@ router.get('/water_control/:data', (req, res) => {
   // const req_power = parseInt(data[1]) // requested power
   console.log(data)
   
-  let state = em.controlWater(temp)
+  let state = em.controlWater(temp/100)
   console.log(state) 
   dm.update('water_temp',temp)
   dm.update('is_heating', state['is_heating'])
