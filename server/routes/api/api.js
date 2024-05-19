@@ -1,7 +1,6 @@
 const express = require('express');
 const dm = require('./datamanager')
 const em = require('./energymanager')
-const job = require('./jobs')
 
 const router = express.Router();
 
@@ -133,8 +132,12 @@ router.get('/energy/:data', async (req, res) => {
   } catch(err) {
     res.send([{}])
   }
-
 })
+
+router.get('/download', (req, res) => {
+  console.log("Download")
+  res.download('db.db')
+});
 
 
   module.exports = router;
