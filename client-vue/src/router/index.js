@@ -23,11 +23,11 @@ const routes = [
     name: 'heating',    
     component: Heating 
   },
-  {
-    path: '/more',
-    name: 'more',    
-    component: More 
-  }
+  // {
+  //   path: '/more',
+  //   name: 'more',    
+  //   component: More 
+  // }
 ]
 
 const router = new VueRouter({

@@ -25,34 +25,6 @@
             <v-spacer></v-spacer>
         </v-app-bar>
 
-        <!-- <v-navigation-drawer app v-model="drawer" class="grey lighten-4">
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title class="title">
-              Solar Logger
-            </v-list-item-title>         
-          </v-list-item-content>
-        </v-list-item>
-  
-        <v-divider></v-divider>
-  
-        <v-list
-          dense
-          nav
-        >
-          <v-list-item
-            v-for="link in links"
-            :key="link.text"
-            router :to="link.route"
-            link
-          >    
-  
-            <v-list-item-content>
-              <v-list-item-title>{{ link.text }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer> -->
     </nav>
 
 </template>
@@ -68,7 +40,7 @@ export default {
                 {text: 'Strom', route: '/'},
                 {text: 'Statistiken', route: '/statistics'},
                 {text: 'Heizung', route: '/heating'},
-                {text: 'Weiteres', route: '/more'},                
+                // {text: 'Weiteres', route: '/more'},                
             ]
         }
     }
