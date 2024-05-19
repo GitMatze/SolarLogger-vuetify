@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from serial import Serial
-from serial import SerialException
+from serial import Serial, SerialException
 import requests
 import json
 import threading
@@ -71,10 +70,10 @@ def serial_read(ser):
         time.sleep(0.1)
         line = ser.readline().decode('utf-8')[:-2]
         if line:
-            if '/ESY5Q3D' in line: # grid meter
+            if 'EBZ5DD32R10ETA' in line: # grid meter
                 read_grid_meter(ser)
                 ser.clear_buffer() # do not parse remaining data
-            elif '/EBZ5DD3' in line: # pv meter
+            elif '/EBZ5DD3LO06ETA' in line: # pv meter
                 read_pv_meter(ser)
                 ser.clear_buffer()
 
@@ -94,8 +93,8 @@ def read_grid_meter(ser):
                 if represents_float(grid_energy_in_kwh):
                     grid_energy_in_mwh = int(1000000 * float(grid_energy_in_kwh))
                     grid_set_complete = grid_set_complete | 0b010
-            elif '1-0:1.7.0' in line: # consumed power in W
-                grid_power_w_str = line[14:-3]
+            elif '1-0:16.7.0' in line: # consumed power in W
+                grid_power_w_str = line[15:-3]
                 if represents_float(grid_power_w_str):
                     grid_power_w = int(float(grid_power_w_str))
                     grid_set_complete = grid_set_complete | 0b001
@@ -132,7 +131,7 @@ def read_pv_meter(ser):
     pv_json["energy"] = pv_energy
     pv_json["power"] = pv_power
     try:
-        response = requests.post(pv_api, headers=headers, data=json.dumps(pv_json), timeout=post_timeout)
+        _response = requests.post(pv_api, headers=headers, data=json.dumps(pv_json), timeout=post_timeout)
     except requests.exceptions.RequestException as e:  # This is the correct syntax
         pass # failed to connect
     if debug_output:
@@ -147,8 +146,8 @@ def main():
         r0 = ReadLine(ser0)
         r1 = ReadLine(ser1)
 
-        thread0 = threading.Thread(target=serial_read, args=(r0,),).start()
-        thread1 = threading.Thread(target=serial_read, args=(r1,),).start()
+        _thread0 = threading.Thread(target=serial_read, args=(r0,),).start()
+        _thread1 = threading.Thread(target=serial_read, args=(r1,),).start()
 
     except SerialException:
         print("Failed to open serial ports. Exiting...")
