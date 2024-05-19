@@ -2,10 +2,9 @@
   <div class="home">
     <v-container>
       <StatusbarHeating/>
-      <v-divider></v-divider>
 
       <v-card
-      class="ma-auto my-4 pa-3"
+      class="ma-auto my-5 pa-3"
       max-width="1300"
       >
         <v-container max-width="40" class="d-flex justify-start">
@@ -68,8 +67,6 @@
           </v-banner>
        </div>
         
-        <v-divider></v-divider>
-
         <v-container class="mx-auto my-2">
           <h2 class="title d-flex justify-space-between"> Speichertemperatur </h2>
          <TempChart chart-id="line-daily" :chartData="chartData" :refresh="refresh"/> 

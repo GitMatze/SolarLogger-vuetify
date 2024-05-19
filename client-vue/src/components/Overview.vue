@@ -1,7 +1,7 @@
 <template>
  
       <v-card
-      class="ma-auto my-4 pa-3"
+      class="ma-auto my-5 pa-3"
       max-width="1300"
       >
         <h2 class="headline mr-9 pb-3 align-self-center hidden-sm-and-up">{{ options.title }}</h2>

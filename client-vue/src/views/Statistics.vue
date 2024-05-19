@@ -13,9 +13,7 @@
         </div>
 
       <Overview chart-id="month-overview" :options="optionsDays" /> 
-      <v-divider></v-divider> 
       <Overview chart-id="day-overview" :options="optionsMonths" />
-      <v-divider></v-divider> 
       <Overview chart-id="year-overview" :options="optionsYears" />   
     </v-container>     
   </div>
