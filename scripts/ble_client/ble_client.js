@@ -1,7 +1,7 @@
 /* eslint-disable handle-callback-err */
 
 // const noble = require('noble');
-const noble = require('@abandonware/noble');
+const noble = require('noble');
 const axios = require('axios')
 
 var intervalObject = null
@@ -93,4 +93,3 @@ function startJob() {
         })
     }, 5000);
 }
-

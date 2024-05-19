@@ -12,6 +12,8 @@
   "dependencies": {
     "@abandonware/noble": "^1.9.2-10",
     "axios": "^0.21.1",
+    "bluetooth-hci-socket": "^0.5.1",
+    "node-red-contrib-noble": "^0.3.0",
     "pm2": "^4.5.1"
   }
 }
