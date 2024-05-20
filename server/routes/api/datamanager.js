@@ -152,15 +152,23 @@ module.exports.getPeriod = async function (name, start, end) { //TODO implement 
 module.exports.getEnergyStats = async function (type, start, end) {
     return new Promise((resolve, reject) => {
         try {
-            db.all(`SELECT STRFTIME($sql, datetime(time, 'localtime')) time, 
-            MAX(pv)-MIN(pv) pv, 
-            MAX(grid_in)-MIN(grid_in) grid_in, 
-            MAX(grid_out)-MIN(grid_out) grid_out 
-            FROM energy
-            WHERE time>datetime($start) AND time<datetime($end) 
-            GROUP BY STRFTIME($sql, datetime(time, 'localtime')) 
-            ORDER BY 1
-            LIMIT 12`,
+            db.all(
+            `SELECT group_ids.formatted_time as time,
+            last_energy.grid_in - first_energy.grid_in AS grid_in,
+            last_energy.grid_out - first_energy.grid_out AS grid_out,
+            last_energy.pv - first_energy.pv AS pv
+            FROM (
+                SELECT strftime($sql, time) AS formatted_time,
+                        MIN(id) AS first_id,
+                        MAX(id) AS last_id
+                FROM energy
+                WHERE time > $start AND time < $end
+                GROUP BY strftime($sql, time)
+            ) AS group_ids
+            JOIN energy AS first_energy ON first_energy.id = group_ids.first_id
+            JOIN energy AS last_energy ON last_energy.id = group_ids.last_id
+            ORDER BY formatted_time
+            LIMIT 12;`,
                 {
                     $sql: sql_groups[type],
                     $start: start,
@@ -172,7 +180,6 @@ module.exports.getEnergyStats = async function (type, start, end) {
                         reject([{}])
                     }
                     else if (rows.length > 0) { // TODO row = undefined not catched
-                        // console.log(`Number of data entries: ${rows.length}`)
                         resolve(rows);
                     }
                     else {
